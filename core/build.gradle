@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+}
+
+group 'com.epam.esm'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation 'org.springframework:spring:5.3.15'
+    implementation 'org.springframework:spring-context:5.3.15'
+    implementation 'com.mchange:c3p0:0.9.5.5'
+    implementation 'mysql:mysql-connector-java:8.0.27'
+    implementation 'org.springframework:spring-jdbc:5.3.15'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.2'
+
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    archivesBaseName = 'cert-system-core'
+    archiveVersion = '1.0-SNAPSHOT'
+}

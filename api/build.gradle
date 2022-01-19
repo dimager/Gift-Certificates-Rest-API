@@ -1,0 +1,35 @@
+plugins {
+    id 'application'
+    id 'war'
+}
+
+group 'com.epam.esm'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation 'org.springframework:spring:5.3.15'
+    implementation 'org.springframework:spring-context:5.3.15'
+    implementation 'org.springframework:spring-web:5.3.15'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.2'
+
+    implementation project(":core")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+war {
+    archivesBaseName = 'cert-system-api'
+    archiveVersion = '1.0-SNAPSHOT'
+}
+
+
+application{
+    mainClassName = 'com.epam.ems.Main'
+}

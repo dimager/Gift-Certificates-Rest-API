@@ -1,0 +1,4 @@
+rootProject.name = 'cert_app'
+include 'core'
+include 'api'
+
