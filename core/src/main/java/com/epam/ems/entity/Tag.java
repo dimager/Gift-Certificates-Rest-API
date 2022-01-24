@@ -1,8 +1,8 @@
-package com.epam.ems.dao.entity;
+package com.epam.ems.entity;
 
 import java.util.Objects;
 
-public class Tag {
+public class Tag  extends BaseEntity{
     private long id;
     private String name;
 

@@ -1,17 +1,24 @@
-package com.epam.ems.dao.entity;
+package com.epam.ems.entity;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class Certificate {
+public class Certificate extends BaseEntity {
     private long id;
     private String name;
     private String description;
     private double price;
     private short duration;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private Timestamp createdTime;
-    private Timestamp lastUpdatedTime;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    private Timestamp lastUpdatedTime;
+    private List<Tag> tags = new ArrayList<>();
 
     public long getId() {
         return id;
@@ -69,17 +76,25 @@ public class Certificate {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return id == that.id && Double.compare(that.price, price) == 0 && duration == that.duration && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(createdTime, that.createdTime) && Objects.equals(lastUpdatedTime, that.lastUpdatedTime);
+        return id == that.id && Double.compare(that.price, price) == 0 && duration == that.duration && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(createdTime, that.createdTime) && Objects.equals(lastUpdatedTime, that.lastUpdatedTime) && Objects.equals(tags, that.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price, duration, createdTime, lastUpdatedTime);
+        return Objects.hash(id, name, description, price, duration, createdTime, lastUpdatedTime, tags);
     }
 
     @Override
@@ -92,6 +107,7 @@ public class Certificate {
                 ", duration=" + duration +
                 ", createdTime=" + createdTime +
                 ", lastUpdatedTime=" + lastUpdatedTime +
+                ", tags=" + tags +
                 '}';
     }
 }

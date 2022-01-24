@@ -1,6 +1,6 @@
 package com.epam.ems.dao.rowmapper;
 
-import com.epam.ems.dao.entity.Certificate;
+import com.epam.ems.entity.Certificate;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
