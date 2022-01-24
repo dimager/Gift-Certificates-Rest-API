@@ -1,7 +1,9 @@
+
 plugins {
     id 'application'
     id 'war'
 }
+
 
 group 'com.epam.esm'
 
@@ -12,12 +14,14 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    implementation 'org.springframework:spring:5.3.15'
     implementation 'org.springframework:spring-context:5.3.15'
+    implementation 'org.springframework:spring-webmvc:5.3.15'
     implementation 'org.springframework:spring-web:5.3.15'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.2'
-
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1'
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     implementation project(":core")
+
 }
 
 test {
@@ -32,4 +36,23 @@ war {
 
 application{
     mainClassName = 'com.epam.ems.Main'
+}
+
+task copyWar(type: Copy) {
+    dependsOn('war')
+    from 'build/libs'
+    into 'D:\\apache-tomee-webprofile-7.1.4\\webapps\\'
+    include 'cert-system-api-1.0-SNAPSHOT.war'
+    rename 'cert-system-api-1.0-SNAPSHOT.war', 'ROOT.war'
+
+}
+
+
+task copyWar2(type: Copy) {
+    dependsOn('clean')
+    dependsOn('war')
+    from 'build/libs'
+    into 'd:\\apache-tomcat-9.0.58\\webapps\\'
+    include 'cert-system-api-1.0-SNAPSHOT.war'
+    rename 'cert-system-api-1.0-SNAPSHOT.war', 'ROOT.war'
 }
