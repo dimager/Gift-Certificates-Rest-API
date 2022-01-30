@@ -1,17 +1,14 @@
 package com.epam.ems.entity;
 
-public class ExceptionResponse {
+import org.springframework.http.HttpStatus;
+
+import java.util.Objects;
+
+public class ExceptionResponse extends BaseEntity {
 
     private String message;
-    private long errorCode;
-
-    public ExceptionResponse() {
-    }
-
-    public ExceptionResponse(String message, long errorCode) {
-        this.message = message;
-        this.errorCode = errorCode;
-    }
+    private String errorCode;
+    private HttpStatus httpStatus;
 
     public String getMessage() {
         return message;
@@ -21,11 +18,41 @@ public class ExceptionResponse {
         this.message = message;
     }
 
-    public long getErrorCode() {
+    public String getErrorCode() {
         return errorCode;
     }
 
-    public void setErrorCode(long errorCode) {
+    public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExceptionResponse that = (ExceptionResponse) o;
+        return Objects.equals(message, that.message) && Objects.equals(errorCode, that.errorCode) && httpStatus == that.httpStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message, errorCode, httpStatus);
+    }
+
+    @Override
+    public String toString() {
+        return "ExceptionResponse{" +
+                "message='" + message + '\'' +
+                ", errorCode='" + errorCode + '\'' +
+                ", httpStatus=" + httpStatus +
+                '}';
     }
 }
