@@ -10,13 +10,14 @@ public class CertificateRowMapper implements RowMapper<Certificate> {
     @Override
     public Certificate mapRow(ResultSet rs, int rowNum) throws SQLException {
         Certificate certificate = new Certificate();
-        certificate.setId(rs.getLong(1));
-        certificate.setName(rs.getString(2));
-        certificate.setDescription(rs.getString(3));
-        certificate.setPrice(rs.getDouble(4));
-        certificate.setDuration(rs.getShort(5));
-        certificate.setCreatedTime(rs.getTimestamp(6));
-        certificate.setLastUpdatedTime(rs.getTimestamp(7));
+        certificate.setId(rs.getLong("id"));
+        certificate.setName(rs.getString("name"));
+        certificate.setDescription(rs.getString("description"));
+        certificate.setPrice(rs.getDouble("price"));
+        certificate.setDuration(rs.getShort("duration"));
+        certificate.setCreatedDateTime(rs.getTimestamp("create_date"));
+        certificate.setLastUpdatedDateTime(rs.getTimestamp("last_update_date"));
         return certificate;
+
     }
 }

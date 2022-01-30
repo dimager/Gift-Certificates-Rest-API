@@ -1,10 +1,27 @@
 package com.epam.ems.entity;
 
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 public class Tag  extends BaseEntity{
     private long id;
+    @NotEmpty(message = "Tag name should be not empty")
+    @Size(min = 1, max = 45, message = "Wrong size of tag name")
     private String name;
+
+    public Tag() {
+    }
+
+    public Tag(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Tag(String name) {
+        this.name = name;
+    }
 
     public long getId() {
         return id;
