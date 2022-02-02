@@ -1,4 +1,4 @@
-package com.epam.ems.entity;
+package com.epam.ems.response;
 
 import org.springframework.http.HttpStatus;
 

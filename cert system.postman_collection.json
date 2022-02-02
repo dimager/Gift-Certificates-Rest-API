@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "3e849c5c-e1eb-4d6e-a742-929ea2f37fd7",
-		"name": "11",
+		"name": "cert system",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -441,34 +441,12 @@
 			"response": []
 		},
 		{
-			"name": "all cert search",
+			"name": "all cert search filter tag",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "mager.keenetic.pro:23000/certificates/search/46",
-					"host": [
-						"mager",
-						"keenetic",
-						"pro"
-					],
-					"port": "23000",
-					"path": [
-						"certificates",
-						"search",
-						"46"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "all cert sort by name desc",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "mager.keenetic.pro:23000/certificates?sorted=true&desc=true",
+					"raw": "mager.keenetic.pro:23000/certificates?sort=true&desc=true&tag=auto&filter=42",
 					"host": [
 						"mager",
 						"keenetic",
@@ -480,12 +458,20 @@
 					],
 					"query": [
 						{
-							"key": "sorted",
+							"key": "sort",
 							"value": "true"
 						},
 						{
 							"key": "desc",
 							"value": "true"
+						},
+						{
+							"key": "tag",
+							"value": "auto"
+						},
+						{
+							"key": "filter",
+							"value": "42"
 						}
 					]
 				}

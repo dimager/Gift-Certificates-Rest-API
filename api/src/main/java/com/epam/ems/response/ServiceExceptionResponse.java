@@ -1,10 +1,10 @@
-package com.epam.ems.entity;
+package com.epam.ems.response;
 
 import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 
-public class ExceptionResponse extends BaseEntity {
+public class ServiceExceptionResponse {
 
     private String message;
     private String errorCode;
@@ -38,7 +38,7 @@ public class ExceptionResponse extends BaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ExceptionResponse that = (ExceptionResponse) o;
+        ServiceExceptionResponse that = (ServiceExceptionResponse) o;
         return Objects.equals(message, that.message) && Objects.equals(errorCode, that.errorCode) && httpStatus == that.httpStatus;
     }
 

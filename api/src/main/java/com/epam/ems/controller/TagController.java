@@ -1,6 +1,5 @@
 package com.epam.ems.controller;
 
-import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.handler.ValidationHandler;
 import com.epam.ems.service.TagService;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -42,10 +42,6 @@ public class TagController {
         return tagService.getTag(id);
     }
 
-    @GetMapping("{name}/certificates")
-    public List<Certificate> getTagCertificates(@PathVariable String name){
-        return tagService.getTagCertificates(name);
-    }
 
     @PostMapping(consumes = {"application/json"})
     public Tag addTag(@RequestBody @Valid Tag tag, BindingResult bindingResult) {
@@ -61,9 +57,7 @@ public class TagController {
     }
 
     @DeleteMapping("{id}")
-    public boolean deleteTag(@PathVariable long id) {
+    public boolean deleteTag(@PathVariable long id, HttpServletResponse response) {
         return tagService.deleteTag(id);
     }
-
-
 }

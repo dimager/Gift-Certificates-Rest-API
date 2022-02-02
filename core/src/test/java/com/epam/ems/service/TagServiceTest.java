@@ -1,10 +1,9 @@
 package com.epam.ems.service;
 
-import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.dao.TagDao;
 import com.epam.ems.entity.Tag;
+import com.epam.ems.service.TagService;
 import com.epam.ems.service.exception.ServiceException;
-import com.epam.ems.service.impl.CertificateServiceImpl;
 import com.epam.ems.service.impl.TagServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,6 @@ import org.springframework.dao.DataAccessException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 
@@ -27,12 +25,6 @@ class TagServiceTest {
 
     @Mock
     private TagDao tagDao;
-
-    @Mock
-    private CertificateDao certificateDao;
-    @Mock
-    private CertificateService certificateService;
-
 
     private TagService tagService;
     private List<Tag> tags;
@@ -55,8 +47,6 @@ class TagServiceTest {
         }
         tag = tags.get(0);
         tagService = new TagServiceImpl(tagDao);
-        certificateService = new CertificateServiceImpl(certificateDao);
-        tagService.setCertificateService(certificateService);
     }
 
 
@@ -125,18 +115,4 @@ class TagServiceTest {
                 () -> Assertions.assertThrows(ServiceException.class, () -> tagService.getTag(tagName)));
     }
 
-    @Test
-    void deleteTag() {
-        when(tagDao.delete(anyLong())).thenReturn(true).thenReturn(false).thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(tagService.deleteTag(anyLong())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.deleteTag(anyLong())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.deleteTag(anyLong())));
-    }
-
-    @Test
-    void getTagCertificates() {
-        tagDao.getTagCertificates("spa").stream().forEach(System.out::println);
-
-    }
 }

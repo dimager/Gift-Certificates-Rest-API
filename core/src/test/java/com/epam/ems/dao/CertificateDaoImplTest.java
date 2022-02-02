@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -22,13 +21,6 @@ class CertificateDaoImplTest {
 
     @Autowired
     private CertificateDao certificateDao;
-
-    private DataAccessException dataAccessException = new DataAccessException("message") {
-        @Override
-        public String getMessage() {
-            return super.getMessage();
-        }
-    };
 
     @Test
     void getAll() {
@@ -69,12 +61,10 @@ class CertificateDaoImplTest {
 
     @Test
     void delete() {
-        long testCertificateId = 100;
+        long testCertificateId = 123;
         Assertions.assertAll(
                 () -> Assertions.assertInstanceOf(Certificate.class,certificateDao.getById(testCertificateId)),
-                () -> certificateDao.deleteCertificateRelations(testCertificateId),
-                () -> Assertions.assertTrue(certificateDao.delete(testCertificateId)),
-                () -> Assertions.assertThrows(DataAccessException.class, () -> certificateDao.getById(testCertificateId)));
+                () -> Assertions.assertTrue(certificateDao.delete(testCertificateId)));
     }
 
 
@@ -82,7 +72,7 @@ class CertificateDaoImplTest {
     void getCertificatesTags() {
         long testCertificateId = 110;
         Assertions.assertAll(
-                () -> Assertions.assertFalse(certificateDao.getCertificatesTags(testCertificateId).isEmpty()));
+                () -> Assertions.assertFalse(certificateDao.getCertificateTags(testCertificateId).isEmpty()));
     }
 
     @Test
@@ -110,14 +100,5 @@ class CertificateDaoImplTest {
                 () -> Assertions.assertTrue(certificateDao.removeTagFromCertificate(tag, certificate)),
                 () -> Assertions.assertFalse(certificateDao.getById(testCertificateId).getTags().contains(tag)),
                 () -> Assertions.assertTrue(certificateDao.isCertificateMissingTag(tag, certificateDao.getById(testCertificateId))));
-    }
-
-    @Test
-    void deleteCertificateRelations() {
-        long testCertificateId = 130;
-        Assertions.assertAll(
-                () -> Assertions.assertFalse(certificateDao.getCertificatesTags(testCertificateId).isEmpty()),
-                () -> certificateDao.deleteCertificateRelations(testCertificateId),
-                () -> Assertions.assertTrue(certificateDao.getCertificatesTags(testCertificateId).isEmpty()));
     }
 }

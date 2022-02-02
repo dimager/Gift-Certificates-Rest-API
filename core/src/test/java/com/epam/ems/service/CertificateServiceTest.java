@@ -3,6 +3,8 @@ package com.epam.ems.service;
 import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
+import com.epam.ems.service.CertificateService;
+import com.epam.ems.service.TagService;
 import com.epam.ems.service.exception.ServiceException;
 import com.epam.ems.service.impl.CertificateServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -35,7 +37,8 @@ class CertificateServiceTest {
     private CertificateService certificateService;
     private List<Certificate> certificates;
     private Certificate certificate;
-    private List<Certificate> certificatesEmpty = new ArrayList<>();
+
+
     private DataAccessException dataAccessException = new DataAccessException("message") {
         @Override
         public String getMessage() {
@@ -61,21 +64,9 @@ class CertificateServiceTest {
             certificates.add(certificate);
         }
         certificate = certificates.get(1);
-        certificateService = new CertificateServiceImpl(certificateDao);
-        certificateService.setTagService(tagService);
+        certificateService = new CertificateServiceImpl(certificateDao, tagService);
     }
 
-    @Test
-    void getAllCertificates() {
-        when(certificateDao.getAll())
-                .thenReturn(certificates)
-                .thenReturn(certificatesEmpty)
-                .thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(certificates.size(), certificateService.getAllCertificates().size()),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.getAllCertificates()),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.getAllCertificates()));
-    }
 
     @Test
     void getCertificate() {
@@ -100,9 +91,9 @@ class CertificateServiceTest {
 
     @Test
     void updateCertificate() {
-        when(tagService.checkTag(any(Tag.class))).thenAnswer((Answer<Tag>) invocation -> invocation.getArgument(0, Tag.class));
+        when(tagService.checkTagForExistenceInDatabase(any(Tag.class))).thenAnswer((Answer<Tag>) invocation -> invocation.getArgument(0, Tag.class));
         when(certificateDao.isCertificateMissingTag(any(Tag.class), any(Certificate.class))).thenReturn(false);
-        when(certificateDao.getCertificatesTags(anyLong())).thenReturn(certificate.getTags());
+        when(certificateDao.getCertificateTags(anyLong())).thenReturn(certificate.getTags());
         when(certificateDao.update(any(Certificate.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0,Certificate.class))
                 .thenThrow(dataAccessException);
@@ -115,9 +106,9 @@ class CertificateServiceTest {
     @Test
     void createCertificate() {
         long generatedId = 100;
-        when(tagService.checkTag(any(Tag.class))).thenAnswer((Answer<Tag>) invocation -> invocation.getArgument(0, Tag.class));
+        when(tagService.checkTagForExistenceInDatabase(any(Tag.class))).thenAnswer((Answer<Tag>) invocation -> invocation.getArgument(0, Tag.class));
         when(certificateDao.isCertificateMissingTag(any(Tag.class), any(Certificate.class))).thenReturn(false);
-        when(certificateDao.getCertificatesTags(anyLong())).thenReturn(certificate.getTags());
+        when(certificateDao.getCertificateTags(anyLong())).thenReturn(certificate.getTags());
         when(certificateDao.create(any(Certificate.class)))
                 .thenAnswer((Answer<Certificate>) invocation -> {
                             Certificate certificate = invocation.getArgument(0, Certificate.class);
@@ -136,7 +127,7 @@ class CertificateServiceTest {
 
     @Test
     void getCertificateTags() {
-        when(certificateDao.getCertificatesTags(anyLong()))
+        when(certificateDao.getCertificateTags(anyLong()))
                 .thenReturn(certificate.getTags())
                 .thenThrow(dataAccessException);
         Assertions.assertAll(

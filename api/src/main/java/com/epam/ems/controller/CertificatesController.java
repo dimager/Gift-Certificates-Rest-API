@@ -4,6 +4,7 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.handler.ValidationHandler;
 import com.epam.ems.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @Validated
@@ -25,6 +28,7 @@ import java.util.List;
 public class CertificatesController {
     private final CertificateService certificateService;
     private final ValidationHandler validationHandler;
+
     @Autowired
     public CertificatesController(CertificateService certificateService, ValidationHandler validationHandler) {
         this.certificateService = certificateService;
@@ -32,9 +36,19 @@ public class CertificatesController {
     }
 
     @GetMapping
-    public List<Certificate> getAllCertificates(@RequestParam(defaultValue = "false") boolean sorted, @RequestParam(defaultValue = "false") boolean desc) {
-        return certificateService.getAllCertificates(sorted, desc);
+    public List<Certificate> getCertificates(@RequestParam(name = "sort", defaultValue = "false") boolean sorted,
+                                             @RequestParam(name = "desc", defaultValue = "false") boolean desc,
+                                             @RequestParam(name = "tag") Optional<String> tagName,
+                                             @RequestParam(name = "filter") Optional<String> pattern,
+                                             HttpServletResponse response) {
+        List<Certificate> certificates = certificateService.getFilteredSortedCertificates(sorted,desc,tagName,pattern);
+        if (certificates.isEmpty()) {
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+        }
+        return certificateService.getFilteredSortedCertificates(sorted,desc,tagName,pattern);
+
     }
+
 
     @GetMapping("{id}")
     public Certificate getCertificate(@PathVariable long id) {
@@ -58,11 +72,5 @@ public class CertificatesController {
         certificate.setId(id);
         return certificateService.updateCertificate(certificate);
     }
-
-    @GetMapping("/search/{pattern}")
-    public List<Certificate> getByPartNameOrDescription(@PathVariable String pattern){
-        return certificateService.getByPartNameOrDescription(pattern);
-    }
-
 
 }

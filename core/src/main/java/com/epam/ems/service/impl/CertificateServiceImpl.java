@@ -16,8 +16,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,48 +29,56 @@ public class CertificateServiceImpl implements CertificateService {
     private static final String MSG_CERTIFICATE_WAS_NOT_UPDATED = "30404;Certificate was not updated. Certificate id=";
     private static final String MSG_CERTIFICATE_WAS_NOT_CREATED = "30405;Certificate was not created. Certificate name=";
     private static final String MSG_GET_CERTIFICATE_TAGS_FAIL = "30406;Cannot get certificate`s tags. Certificate id=";
+
     private final CertificateDao certificateDao;
     private TagService tagService;
 
     @Autowired
-    public CertificateServiceImpl(CertificateDao certificateDao) {
+    public CertificateServiceImpl(CertificateDao certificateDao, TagService tagService) {
         this.certificateDao = certificateDao;
-    }
-
-    @Autowired
-    @Override
-    public void setTagService(TagService tagService) {
         this.tagService = tagService;
     }
 
     @Override
+    @Transactional
     public List<Certificate> getAllCertificates() {
         return getCertificates();
     }
 
     @Override
-    public List<Certificate> getAllCertificates(boolean sorted, boolean desc) {
+    @Transactional
+    public List<Certificate> getFilteredSortedCertificates(boolean sorted, boolean desc,
+                                                           Optional<String> tagName, Optional<String> pattern) {
+        List<Certificate> certificates = this.getCertificates();
+        if (pattern.isPresent()) {
+            certificates = this.getAllCertificates().stream()
+                    .filter(certificate -> certificate.getName().contains(pattern.get())
+                            || certificate.getDescription().contains(pattern.get()))
+                    .collect(Collectors.toList());
+        }
+
+        if (tagName.isPresent() && tagService.isTagExistByName(tagName.get())) {
+            Tag tag = tagService.getTag(tagName.get());
+            certificates = certificates.stream()
+                    .filter(certificate -> certificate.getTags()
+                            .contains(tag))
+                    .collect(Collectors.toList());
+        }
         if (sorted) {
-            List<Certificate> sortedList = getCertificates().stream()
-                    .sorted(Comparator.comparing(Certificate::getName))
+            certificates = certificates.stream()
+                    .sorted(Certificate::compareTo)
                     .collect(Collectors.toList());
             if (desc) {
-                Collections.sort(sortedList, Collections.reverseOrder());
+                Collections.sort(certificates, Collections.reverseOrder());
             }
-            return sortedList;
-        } else {
-            return getCertificates();
         }
+
+        return certificates;
     }
 
     private List<Certificate> getCertificates() {
         try {
-            List<Certificate> certificates = certificateDao.getAll();
-            if (certificates.isEmpty()) {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATES_WERE_NOT_FOUND);
-            } else {
-                return certificates;
-            }
+            return certificateDao.getAll();
         } catch (DataAccessException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_CERTIFICATES_WERE_NOT_FOUND, e.getCause());
         }
@@ -90,11 +98,10 @@ public class CertificateServiceImpl implements CertificateService {
     @Transactional
     public boolean deleteCertificate(long id) {
         try {
-            certificateDao.deleteCertificateRelations(id);
             if (certificateDao.delete(id)) {
                 return true;
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_DELETED + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND + id);
             }
         } catch (DataAccessException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_CERTIFICATE_WAS_NOT_DELETED + id, e.getCause());
@@ -131,30 +138,24 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public List<Tag> getCertificateTags(long id) {
         try {
-            return certificateDao.getCertificatesTags(id);
+            return certificateDao.getCertificateTags(id);
         } catch (DataAccessException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_GET_CERTIFICATE_TAGS_FAIL + id, e.getCause());
         }
     }
 
-
-    @Override
-    public List<Certificate> getByPartNameOrDescription(String pattern) {
-        return certificateDao.getByPartNameOrDescription(pattern);
-    }
-
     private void updateTags(Certificate certificate) {
-        checkInputTags(certificate);
+        checkInputTagsForExistenceInDatabase(certificate);
         addMissingTagRelations(certificate);
         removeExtraTagRelations(certificate);
     }
 
-    private void checkInputTags(Certificate certificate) {
+    private void checkInputTagsForExistenceInDatabase(Certificate certificate) {
         List<Tag> tags = new ArrayList<>();
         tags.addAll(certificate.getTags());
         certificate.getTags().clear();
         for (Tag tag : tags) {
-            tag = this.tagService.checkTag(tag);
+            tag = this.tagService.checkTagForExistenceInDatabase(tag);
             certificate.getTags().add(tag);
         }
     }

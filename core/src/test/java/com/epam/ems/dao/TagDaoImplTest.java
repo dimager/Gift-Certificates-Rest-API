@@ -1,7 +1,6 @@
 package com.epam.ems.dao;
 
 import com.epam.ems.TestDaoConfig;
-import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,27 +11,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import javax.sql.DataSource;
-import java.util.List;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestDaoConfig.class, loader = AnnotationConfigContextLoader.class)
 class TagDaoImplTest {
 
     @Autowired
-    DataSource dataSource;
-
-    @Autowired
     private TagDao tagDao;
-
-    @Autowired
-    private CertificateDao certificateDao;
 
     @Test
     void delete() {
         Tag tag = tagDao.getById(10);
         Assertions.assertAll(
-                () -> Assertions.assertDoesNotThrow(() -> tagDao.deleteTagRelations(tag.getId())),
                 () -> Assertions.assertTrue(tagDao.delete(tag.getId())),
                 () -> Assertions.assertFalse(tagDao.getAll().contains(tag)),
                 () -> Assertions.assertFalse(tagDao.delete(-1))
@@ -71,7 +61,7 @@ class TagDaoImplTest {
     }
 
     @Test
-    void checkTag() {
+    void checkTagForExistenceInDatabase() {
         Tag tagAuto = tagDao.getByName("auto");
         Tag tagTravel = tagDao.getByName("travel");
         Tag tagWithNewName = new Tag("tagWithNewName");
@@ -80,35 +70,14 @@ class TagDaoImplTest {
         Tag tagWithCorrectIdAndNewName = new Tag(20, "newName");
         Tag tagWithCorrectName = new Tag("auto");
 
-
         Assertions.assertAll(
-                () -> Assertions.assertTrue(tagDao.checkTag(tagWithNewName).getId() != 0),
-                () -> Assertions.assertInstanceOf(Tag.class, tagDao.checkTag(tagWithCorrectIdAndNewName)),
+                () -> Assertions.assertTrue(tagDao.checkTagForExistenceInDatabase(tagWithNewName).getId() != 0),
+                () -> Assertions.assertInstanceOf(Tag.class, tagDao.checkTagForExistenceInDatabase(tagWithCorrectIdAndNewName)),
                 () -> Assertions.assertEquals(tagWithCorrectIdAndNewName, tagDao.getById(tagWithCorrectIdAndNewName.getId())),
-                () -> Assertions.assertEquals(tagAuto, tagDao.checkTag(tagWithCorrectName)),
-                () -> Assertions.assertTrue(tagDao.checkTag(tagWithNewNameAndIncorrectId).getId() != 2134),
-                () -> Assertions.assertEquals(tagTravel.getId(), tagDao.checkTag(tagWithIncorrectIdAndCorrectName).getId())
+                () -> Assertions.assertEquals(tagAuto, tagDao.checkTagForExistenceInDatabase(tagWithCorrectName)),
+                () -> Assertions.assertTrue(tagDao.checkTagForExistenceInDatabase(tagWithNewNameAndIncorrectId).getId() != 2134),
+                () -> Assertions.assertEquals(tagTravel.getId(), tagDao.checkTagForExistenceInDatabase(tagWithIncorrectIdAndCorrectName).getId())
         );
 
-    }
-
-    @Test
-    void deleteTagRelations() {
-        long tagId = 15;
-        Tag tag = tagDao.getById(tagId);
-        Assertions.assertAll(
-                () -> Assertions.assertDoesNotThrow(() -> tagDao.deleteTagRelations(tagId)),
-                () -> Assertions.assertTrue(tagDao.getTagCertificates(tag.getName()).isEmpty())
-        );
-    }
-
-    @Test
-    void getTagCertificates() {
-        Tag tagSport = tagDao.getById(14);
-        List<Certificate> certificates = tagDao.getTagCertificates(tagSport.getName());
-        certificates.forEach(certificate -> certificate.getTags().addAll(certificateDao.getCertificatesTags(certificate.getId())));
-        for (Certificate certificate : certificates) {
-            Assertions.assertTrue(certificate.getTags().contains(tagSport));
-        }
     }
 }

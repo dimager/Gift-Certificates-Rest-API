@@ -31,8 +31,8 @@ create table GIFT_CERTIFICATE_HAS_TAG
     constraint GIFT_CERTIFICATE_HAS_TAG_PK
         primary key (GIFT_CERTIFICATE_ID, TAG_ID),
     constraint GIFT_CERTIFICATE_HAS_TAG_GIFT_CERTIFICATE_ID_FK
-        foreign key (GIFT_CERTIFICATE_ID) references GIFT_CERTIFICATE (ID),
+        foreign key (GIFT_CERTIFICATE_ID) references GIFT_CERTIFICATE (ID) on DELETE CASCADE ,
     constraint GIFT_CERTIFICATE_HAS_TAG_TAG_ID_FK
-        foreign key (TAG_ID) references TAG (ID)
+        foreign key (TAG_ID) references TAG (ID) on DELETE CASCADE
 );
 
