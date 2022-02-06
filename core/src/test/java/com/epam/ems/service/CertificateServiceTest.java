@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DataAccessException;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +57,7 @@ class CertificateServiceTest {
             certificate.setId(i);
             certificate.setName("certName" + i);
             certificate.setDescription("description" + 1);
-            certificate.setPrice(i + 10);
+            certificate.setPrice(new BigDecimal(i + 10));
             certificate.setDuration((short) (i * 3));
             certificate.setCreatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
             certificate.setLastUpdatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
@@ -80,10 +83,12 @@ class CertificateServiceTest {
 
     @Test
     void deleteCertificate() {
-        Assertions.assertAll(() -> when(certificateDao.delete(anyLong()))
-                        .thenReturn(true)
-                        .thenReturn(false)
-                        .thenThrow(dataAccessException),
+        when(certificateDao.isCertificateExistById(anyLong())).thenReturn(true).thenReturn(false);
+        when(certificateDao.delete(anyLong()))
+                .thenReturn(true)
+                .thenReturn(false)
+                .thenThrow(dataAccessException);
+        Assertions.assertAll(
                 () -> Assertions.assertTrue(certificateService.deleteCertificate(anyLong())),
                 () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.deleteCertificate(anyLong())),
                 () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.deleteCertificate(anyLong())));
@@ -91,38 +96,27 @@ class CertificateServiceTest {
 
     @Test
     void updateCertificate() {
-        when(tagService.checkTagForExistenceInDatabase(any(Tag.class))).thenAnswer((Answer<Tag>) invocation -> invocation.getArgument(0, Tag.class));
-        when(certificateDao.isCertificateMissingTag(any(Tag.class), any(Certificate.class))).thenReturn(false);
-        when(certificateDao.getCertificateTags(anyLong())).thenReturn(certificate.getTags());
-        when(certificateDao.update(any(Certificate.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0,Certificate.class))
-                .thenThrow(dataAccessException);
+
+        when(certificateDao.update(certificate)).thenReturn(certificate);
+        when(tagService.createTag(any(Tag.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(certificateService.getCertificateTags(certificate.getId())).thenReturn(certificate.getTags());
+        when(certificateDao.isCertificateMissingTag(any(Tag.class),any(Certificate.class))).thenReturn(true);
 
         Assertions.assertAll(
-                () -> Assertions.assertEquals(certificate, certificateService.updateCertificate(certificate)),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.updateCertificate(certificate)));
+                () -> Assertions.assertEquals(certificate, certificateService.updateCertificate(certificate)));
     }
 
     @Test
     void createCertificate() {
-        long generatedId = 100;
-        when(tagService.checkTagForExistenceInDatabase(any(Tag.class))).thenAnswer((Answer<Tag>) invocation -> invocation.getArgument(0, Tag.class));
-        when(certificateDao.isCertificateMissingTag(any(Tag.class), any(Certificate.class))).thenReturn(false);
-        when(certificateDao.getCertificateTags(anyLong())).thenReturn(certificate.getTags());
-        when(certificateDao.create(any(Certificate.class)))
-                .thenAnswer((Answer<Certificate>) invocation -> {
-                            Certificate certificate = invocation.getArgument(0, Certificate.class);
-                            certificate.setId(generatedId);
-                            return certificate;
-                })
-                .thenThrow(dataAccessException);
+        when(certificateDao.create(certificate))
+                .thenReturn(certificate);
+
         Certificate createdCertificate = certificateService.createCertificate(certificate);
         Assertions.assertAll(
                 () -> Assertions.assertTrue(createdCertificate.getCreatedDateTime()
                         .after(Timestamp.valueOf(LocalDateTime.now().minusSeconds(5)))),
                 () -> Assertions.assertTrue(createdCertificate.getLastUpdatedDateTime()
-                        .after(Timestamp.valueOf(LocalDateTime.now().minusSeconds(5)))),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.createCertificate(certificate)));
+                        .after(Timestamp.valueOf(LocalDateTime.now().minusSeconds(5)))));
     }
 
     @Test
@@ -135,34 +129,3 @@ class CertificateServiceTest {
                 () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.getCertificateTags(anyLong())));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

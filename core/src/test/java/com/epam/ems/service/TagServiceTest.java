@@ -2,7 +2,6 @@ package com.epam.ems.service;
 
 import com.epam.ems.dao.TagDao;
 import com.epam.ems.entity.Tag;
-import com.epam.ems.service.TagService;
 import com.epam.ems.service.exception.ServiceException;
 import com.epam.ems.service.impl.TagServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +16,7 @@ import org.springframework.dao.DataAccessException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -52,7 +52,10 @@ class TagServiceTest {
 
     @Test
     void getAllTags() {
-        when(tagDao.getAll()).thenReturn(tags).thenReturn(tags).thenThrow(dataAccessException);
+        when(tagDao.getAll())
+                .thenReturn(tags)
+                .thenReturn(tags)
+                .thenThrow(dataAccessException);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(tags, tagService.getAllTags()),
                 () -> Assertions.assertTrue(tagService.getAllTags().contains(tag)),
@@ -88,16 +91,15 @@ class TagServiceTest {
         long generatedId = 100;
         Tag tag = new Tag();
         tag.setName("testTag");
-        when(tagDao.create(tag))
-                .thenAnswer((Answer<Tag>) invocation -> {
-                    Tag tmpTag = invocation.getArgument(0, Tag.class);
-                    tmpTag.setId(generatedId);
-                    return tmpTag;
-                })
-                .thenThrow(dataAccessException);
+        tag.setId(generatedId);
 
-        Assertions.assertAll(() -> tag.setName("newName"),
-                () -> Assertions.assertEquals(generatedId, tagService.createTag(tag).getId()),
+        when(tagDao.isTagExistByName(any())).thenReturn(true).thenReturn(false).thenThrow(dataAccessException);
+        when(tagDao.getByName(any())).thenReturn(tag);
+        when(tagDao.create(tag)).thenReturn(tag);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(tag, tagService.createTag(tag)),
+                () -> Assertions.assertEquals(tag,tagService.createTag(tag)),
                 () -> Assertions.assertThrows(ServiceException.class, () -> tagService.createTag(tag)));
     }
 

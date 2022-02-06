@@ -20,16 +20,11 @@ import java.util.List;
 @ComponentScan("com.epam.ems")
 @EnableTransactionManagement
 public class WebConfig implements WebMvcConfigurer {
+
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(converter());
         WebMvcConfigurer.super.configureMessageConverters(converters);
-    }
-
-    @Bean
-    MappingJackson2HttpMessageConverter converter() {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        return converter;
     }
 
     private DataSource dataSource;
@@ -37,6 +32,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    @Bean
+    MappingJackson2HttpMessageConverter converter() {
+        return new MappingJackson2HttpMessageConverter();
     }
 
     @Bean

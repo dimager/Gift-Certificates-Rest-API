@@ -20,7 +20,6 @@ public class TagServiceImpl implements TagService {
     private static final String MSG_TAG_WAS_NOT_CREATED = "30204;Tag was not created. Tag name=";
     private static final String MSG_TAG_WAS_NOT_FOUND_BY_NAME = "30205;Tag was not found by name. Tag name=";
     private static final String MSG_TAG_WAS_NOT_DELETED = "30206;Tag was not deleted. Tag id=";
-    private static final String MSG_IS_TAG_MISSING = "30207;Can`t check tag existence. Tag name=";
     private final TagDao tagDao;
 
     @Autowired
@@ -30,11 +29,11 @@ public class TagServiceImpl implements TagService {
 
 
     @Override
-    public List<Tag> getAllTags() throws ServiceException {
+    public List<Tag> getAllTags() {
         try {
             return tagDao.getAll();
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAGS_WERE_NOT_FOUND, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAGS_WERE_NOT_FOUND, e.getCause());
         }
 
     }
@@ -45,11 +44,9 @@ public class TagServiceImpl implements TagService {
         try {
             return tagDao.getById(id);
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id, e.getCause());
         }
     }
-
-
 
     @Override
     @Transactional
@@ -57,7 +54,7 @@ public class TagServiceImpl implements TagService {
         try {
             return tagDao.update(tag);
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_UPDATED + tag.getId(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId(), e.getCause());
         }
     }
 
@@ -66,15 +63,19 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag createTag(Tag tag) {
         try {
-            return tagDao.create(tag);
+            if (tagDao.isTagExistByName(tag.getName())) {
+                return tagDao.getByName(tag.getName());
+            } else {
+                return tagDao.create(tag);
+            }
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_CREATED + tag.getName(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_CREATED + tag.getName(), e.getCause());
         }
     }
 
 
     @Override
-    public Tag getTag(String name){
+    public Tag getTag(String name) {
         try {
             return tagDao.getByName(name);
         } catch (DataAccessException e) {
@@ -87,29 +88,18 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public boolean deleteTag(long id) {
         try {
-            if (tagDao.delete(id)) {
-                return true;
+            if (tagDao.isTagExistById(id)) {
+                return tagDao.delete(id);
             } else {
                 throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id);
             }
         } catch (DataAccessException e) {
-            e.printStackTrace();
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_DELETED + id, e.getCause());
         }
     }
 
     @Override
-    @Transactional
-    public Tag checkTagForExistenceInDatabase(Tag tag) {
-        try {
-            return tagDao.checkTagForExistenceInDatabase(tag);
-        } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_IS_TAG_MISSING, e.getCause());
-        }
-    }
-
-    @Override
-    public boolean isTagExistByName (String name){
+    public boolean isTagExistByName(String name) {
         return tagDao.isTagExistByName(name);
     }
 }

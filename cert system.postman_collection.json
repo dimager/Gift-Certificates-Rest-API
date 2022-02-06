@@ -148,7 +148,94 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"newtag\"\r\n}",
+					"raw": "{\r\n    \"name\": \"newtag124321\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "mager.keenetic.pro:23000\\tags",
+					"host": [
+						"mager",
+						"keenetic",
+						"pro"
+					],
+					"port": "23000",
+					"path": [
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new tag exist tag",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"auto\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "mager.keenetic.pro:23000\\tags",
+					"host": [
+						"mager",
+						"keenetic",
+						"pro"
+					],
+					"port": "23000",
+					"path": [
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new tag exception",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "mager.keenetic.pro:23000\\tags",
+					"host": [
+						"mager",
+						"keenetic",
+						"pro"
+					],
+					"port": "23000",
+					"path": [
+						"tags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new tag valid exception",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglongname\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -177,7 +264,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 10,\r\n    \"name\": \"new_cert\",\r\n    \"description\": \"new_desc\",\r\n    \"price\": 83.0,\r\n    \"duration\": 4,\r\n    \"createdDateTime\": \"2021-12-04T12:50:16.000Z\",\r\n    \"lastUpdatedDateTime\": \"2022-01-23T06:05:21.000Z\",\r\n    \"tags\": [\r\n        {\r\n            \"id\": 10,\r\n            \"name\": \"food\"\r\n        },\r\n        {\r\n            \"id\": 18,\r\n            \"name\": \"karting\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"name\": \"new_cert1\",\r\n    \"description\": \"new_desc\",\r\n    \"price\": 83.0,\r\n    \"duration\": 4,\r\n    \"tags\": [\r\n        {\r\n            \"name\": \"auto\"  \r\n        },\r\n        {\r\n            \"name\": \"food\"  \r\n        },\r\n        {\r\n            \"name\": \"newtag101\"  \r\n        }\r\n    ]\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -185,7 +272,7 @@
 					}
 				},
 				"url": {
-					"raw": "mager.keenetic.pro:23000\\certificates\\10",
+					"raw": "mager.keenetic.pro:23000\\certificates",
 					"host": [
 						"mager",
 						"keenetic",
@@ -193,8 +280,36 @@
 					],
 					"port": "23000",
 					"path": [
-						"certificates",
-						"10"
+						"certificates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new cert exception",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"tags\": [\r\n        {\r\n            \"name\": \"food\"  \r\n        },\r\n        {\r\n            \"name\": \"newtag1112\"  \r\n        },\r\n        {\r\n            \"name\": \"verylonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglongname\"  \r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "mager.keenetic.pro:23000\\certificates",
+					"host": [
+						"mager",
+						"keenetic",
+						"pro"
+					],
+					"port": "23000",
+					"path": [
+						"certificates"
 					]
 				}
 			},
@@ -207,7 +322,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 12,\r\n    \"name\": \"newtag_put\"\r\n}",
+					"raw": "{\r\n    \"name\": \"newtagname\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -237,7 +352,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 10,\r\n    \"name\": \"cert_name654\",\r\n    \"description\": \"description698\",\r\n    \"price\": 83.0,\r\n    \"duration\": 4,\r\n    \"createdDateTime\": \"2021-12-04T12:50:16.000Z\",\r\n    \"lastUpdatedDateTime\": \"2022-01-23T06:05:21.000Z\",\r\n    \"tags\": [\r\n        {\r\n            \"id\": 10,\r\n            \"name\": \"food\"\r\n        },\r\n        {\r\n            \"id\": 18,\r\n            \"name\": \"karting\"\r\n        },\r\n        {\r\n            \"name\": \"food\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"name\": \"newcertificate200\",\r\n    \"description\": \"description200\",\r\n    \"price\": 83.0,\r\n    \"duration\": 4,\r\n    \"tags\": [\r\n        {\r\n            \"id\": 10,\r\n            \"name\": \"food\"\r\n        },\r\n        {\r\n            \"id\": 18,\r\n            \"name\": \"karting\"\r\n        },\r\n        {\r\n            \"name\": \"newtag200\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -245,7 +360,7 @@
 					}
 				},
 				"url": {
-					"raw": "mager.keenetic.pro:23000\\certificates\\10",
+					"raw": "mager.keenetic.pro:23000\\certificates\\200",
 					"host": [
 						"mager",
 						"keenetic",
@@ -254,7 +369,7 @@
 					"port": "23000",
 					"path": [
 						"certificates",
-						"10"
+						"200"
 					]
 				}
 			},
@@ -267,7 +382,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 12,\r\n    \"name\": \"newtag_put\"\r\n}",
+					"raw": "{\r\n    \"name\": \"newtag_put1200\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -275,7 +390,7 @@
 					}
 				},
 				"url": {
-					"raw": "mager.keenetic.pro:23000\\tags\\1111",
+					"raw": "mager.keenetic.pro:23000\\tags\\1200",
 					"host": [
 						"mager",
 						"keenetic",
@@ -284,7 +399,7 @@
 					"port": "23000",
 					"path": [
 						"tags",
-						"1111"
+						"1200"
 					]
 				}
 			},
@@ -297,7 +412,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 10,\r\n    \"name\": \"cert_name654\",\r\n    \"description\": \"description698\",\r\n    \"price\": 83.0,\r\n    \"duration\": 4,\r\n    \"createdDateTime\": \"2021-12-04T12:50:16.000Z\",\r\n    \"lastUpdatedDateTime\": \"2022-01-23T06:05:21.000Z\",\r\n    \"tags\": [\r\n        {\r\n            \"id\": 10,\r\n            \"name\": \"food\"\r\n        },\r\n        {\r\n            \"id\": 18,\r\n            \"name\": \"karting\"\r\n        },\r\n        {\r\n            \"name\": \"food\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"name\": \"cert_name654\",\r\n    \"description\": \"description698\",\r\n    \"price\": 83.0,\r\n    \"duration\": 4,\r\n    \"tags\": [\r\n        {\r\n            \"id\": 10,\r\n            \"name\": \"food\"\r\n        },\r\n        {\r\n            \"id\": 18,\r\n            \"name\": \"karting\"\r\n        },\r\n        {\r\n            \"name\": \"food\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -305,7 +420,7 @@
 					}
 				},
 				"url": {
-					"raw": "mager.keenetic.pro:23000\\certificates\\1000",
+					"raw": "mager.keenetic.pro:23000\\certificates\\1200",
 					"host": [
 						"mager",
 						"keenetic",
@@ -314,7 +429,7 @@
 					"port": "23000",
 					"path": [
 						"certificates",
-						"1000"
+						"1200"
 					]
 				}
 			},
@@ -365,7 +480,7 @@
 					}
 				},
 				"url": {
-					"raw": "mager.keenetic.pro:23000\\tags\\47",
+					"raw": "mager.keenetic.pro:23000\\tags\\11",
 					"host": [
 						"mager",
 						"keenetic",
@@ -374,7 +489,7 @@
 					"port": "23000",
 					"path": [
 						"tags",
-						"47"
+						"11"
 					]
 				}
 			},
@@ -446,7 +561,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "mager.keenetic.pro:23000/certificates?sort=true&desc=true&tag=auto&filter=42",
+					"raw": "mager.keenetic.pro:23000/certificates?filter=005",
 					"host": [
 						"mager",
 						"keenetic",
@@ -459,19 +574,52 @@
 					"query": [
 						{
 							"key": "sort",
-							"value": "true"
+							"value": "name",
+							"disabled": true
 						},
 						{
-							"key": "desc",
-							"value": "true"
+							"key": "sort",
+							"value": "name_desc",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "date",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "date_desc",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "name_date",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "name_date_desc",
+							"disabled": true
+						},
+						{
+							"key": "sort",
+							"value": "wrong_param",
+							"disabled": true
 						},
 						{
 							"key": "tag",
-							"value": "auto"
+							"value": "auto",
+							"disabled": true
+						},
+						{
+							"key": "tag",
+							"value": "notag",
+							"disabled": true
 						},
 						{
 							"key": "filter",
-							"value": "42"
+							"value": "005"
 						}
 					]
 				}

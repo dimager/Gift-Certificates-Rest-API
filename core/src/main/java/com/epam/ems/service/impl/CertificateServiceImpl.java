@@ -16,7 +16,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,15 @@ public class CertificateServiceImpl implements CertificateService {
     private static final String MSG_CERTIFICATE_WAS_NOT_UPDATED = "30404;Certificate was not updated. Certificate id=";
     private static final String MSG_CERTIFICATE_WAS_NOT_CREATED = "30405;Certificate was not created. Certificate name=";
     private static final String MSG_GET_CERTIFICATE_TAGS_FAIL = "30406;Cannot get certificate`s tags. Certificate id=";
+    private static final String MSG_TAG_WAS_NOT_FOUND = "30202;Tag was not found. Tag name=";
+
+    private final static String SORT_NAME = "name";
+    private final static String SORT_NAME_DESC = "name_desc";
+    private final static String SORT_DATE = "date";
+    private final static String SORT_DATE_DESC = "date_desc";
+    private final static String SORT_NAME_DATE = "name_date";
+    private final static String SORT_NAME_DATE_DESC = "name_date_desc";
+
 
     private final CertificateDao certificateDao;
     private TagService tagService;
@@ -39,48 +50,92 @@ public class CertificateServiceImpl implements CertificateService {
         this.tagService = tagService;
     }
 
-    @Override
-    @Transactional
-    public List<Certificate> getAllCertificates() {
-        return getCertificates();
-    }
 
     @Override
     @Transactional
-    public List<Certificate> getFilteredSortedCertificates(boolean sorted, boolean desc,
-                                                           Optional<String> tagName, Optional<String> pattern) {
+    public List<Certificate> getFilteredSortedCertificates(Optional<String> sort,
+                                                           Optional<String> tagName,
+                                                           Optional<String> filterPattern) {
+
         List<Certificate> certificates = this.getCertificates();
-        if (pattern.isPresent()) {
-            certificates = this.getAllCertificates().stream()
-                    .filter(certificate -> certificate.getName().contains(pattern.get())
-                            || certificate.getDescription().contains(pattern.get()))
-                    .collect(Collectors.toList());
+
+        if (filterPattern.isPresent()) {
+            certificates = filterCertificateNameOrDescriptionContains(certificates, filterPattern.get());
         }
 
-        if (tagName.isPresent() && tagService.isTagExistByName(tagName.get())) {
-            Tag tag = tagService.getTag(tagName.get());
-            certificates = certificates.stream()
-                    .filter(certificate -> certificate.getTags()
-                            .contains(tag))
-                    .collect(Collectors.toList());
-        }
-        if (sorted) {
-            certificates = certificates.stream()
-                    .sorted(Certificate::compareTo)
-                    .collect(Collectors.toList());
-            if (desc) {
-                Collections.sort(certificates, Collections.reverseOrder());
+        if (tagName.isPresent()) {
+            if (tagService.isTagExistByName(tagName.get())) {
+                certificates = findCertificatesWithTag(certificates, tagName.get());
+            } else {
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + tagName.get());
             }
         }
 
+        if (sort.isPresent()) {
+            switch (sort.get().toLowerCase(Locale.ROOT)) {
+                case SORT_NAME:
+                    sortCertificateListByName(certificates);
+                    break;
+                case SORT_NAME_DESC:
+                    sortCertificateListByName(certificates);
+                    certificates.sort(Collections.reverseOrder());
+                    break;
+                case SORT_DATE:
+                    sortCertificateListByDate(certificates);
+                    break;
+                case SORT_DATE_DESC:
+                    sortCertificateListByDate(certificates);
+                    certificates.sort(Collections.reverseOrder());
+                    break;
+                case SORT_NAME_DATE:
+                    sortCertificateListByNameAndDate(certificates);
+                    break;
+                case SORT_NAME_DATE_DESC:
+                    sortCertificateListByNameAndDate(certificates);
+                    certificates.sort(Collections.reverseOrder());
+                    break;
+                default:
+                    return certificates;
+            }
+        }
         return certificates;
     }
+
+    private List<Certificate> findCertificatesWithTag(List<Certificate> certificates, String tagName) {
+        Tag tag = tagService.getTag(tagName);
+        certificates = certificates.stream()
+                .filter(certificate -> certificate.getTags()
+                        .contains(tag))
+                .collect(Collectors.toList());
+        return certificates;
+    }
+
+    private List<Certificate> filterCertificateNameOrDescriptionContains(List<Certificate> certificates, String filterPattern) {
+        certificates = certificates.stream().filter(certificate -> certificate.getName().contains(filterPattern)
+                        || certificate.getDescription().contains(filterPattern))
+                .collect(Collectors.toList());
+        return certificates;
+    }
+
+    private void sortCertificateListByName(List<Certificate> certificates) {
+        certificates.sort(Comparator.comparing(Certificate::getName));
+    }
+
+    private void sortCertificateListByDate(List<Certificate> certificates) {
+        certificates.sort(Comparator.comparing(Certificate::getCreatedDateTime));
+    }
+
+    private void sortCertificateListByNameAndDate(List<Certificate> certificates) {
+        certificates.sort(Comparator.comparing(Certificate::getName)
+                .thenComparing(Certificate::getCreatedDateTime));
+    }
+
 
     private List<Certificate> getCertificates() {
         try {
             return certificateDao.getAll();
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_CERTIFICATES_WERE_NOT_FOUND, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATES_WERE_NOT_FOUND, e.getCause());
         }
     }
 
@@ -98,13 +153,13 @@ public class CertificateServiceImpl implements CertificateService {
     @Transactional
     public boolean deleteCertificate(long id) {
         try {
-            if (certificateDao.delete(id)) {
-                return true;
+            if (certificateDao.isCertificateExistById(id)) {
+                return certificateDao.delete(id);
             } else {
                 throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND + id);
             }
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_CERTIFICATE_WAS_NOT_DELETED + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_DELETED + id, e.getCause());
         }
     }
 
@@ -113,10 +168,10 @@ public class CertificateServiceImpl implements CertificateService {
     public Certificate updateCertificate(Certificate certificate) {
         certificate.setLastUpdatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
         try {
-            this.updateTags(certificate);
+            this.updateCertificateTags(certificate);
             return certificateDao.update(certificate);
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_CERTIFICATE_WAS_NOT_UPDATED + certificate.getId(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED + certificate.getId(), e.getCause());
         }
 
     }
@@ -128,10 +183,10 @@ public class CertificateServiceImpl implements CertificateService {
         certificate.setLastUpdatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
         try {
             certificate = certificateDao.create(certificate);
-            this.updateTags(certificate);
+            this.updateCertificateTags(certificate);
             return certificate;
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_CERTIFICATE_WAS_NOT_CREATED + certificate.getName(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_CREATED + certificate.getName(), e.getCause());
         }
     }
 
@@ -140,22 +195,21 @@ public class CertificateServiceImpl implements CertificateService {
         try {
             return certificateDao.getCertificateTags(id);
         } catch (DataAccessException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_GET_CERTIFICATE_TAGS_FAIL + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_GET_CERTIFICATE_TAGS_FAIL + id, e.getCause());
         }
     }
 
-    private void updateTags(Certificate certificate) {
+    private void updateCertificateTags(Certificate certificate) {
         checkInputTagsForExistenceInDatabase(certificate);
         addMissingTagRelations(certificate);
         removeExtraTagRelations(certificate);
     }
 
     private void checkInputTagsForExistenceInDatabase(Certificate certificate) {
-        List<Tag> tags = new ArrayList<>();
-        tags.addAll(certificate.getTags());
+        List<Tag> tags = new ArrayList<>(certificate.getTags());
         certificate.getTags().clear();
         for (Tag tag : tags) {
-            tag = this.tagService.checkTagForExistenceInDatabase(tag);
+            tag = tagService.createTag(tag);
             certificate.getTags().add(tag);
         }
     }

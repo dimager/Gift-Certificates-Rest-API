@@ -3,21 +3,26 @@ package com.epam.ems.service;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * This interface allows to manage certificates.
+ * This interface allows managing certificates.
  */
 @Service
 public interface CertificateService {
 
     /**
-     * Allows getting list of all {@link Certificate certificates};
+     * Allows getting list of all {@link Certificate certificates}, could be sorted, filtered by name, description, tag name;
+     * @param sort type of sorting.
+     * @param tagName Name of tag which should be included in certificate
+     * @param pattern pattern used for filtering by name or description
      * @return List of {@link Certificate certificates};
      */
-    List<Certificate> getAllCertificates();
+    List<Certificate> getFilteredSortedCertificates(Optional<String> sort,
+                                                    Optional<String> tagName, Optional<String> pattern);
 
     /**
      * Allows getting {@link Certificate} entity from DB by id.
@@ -54,14 +59,4 @@ public interface CertificateService {
      */
     List<Tag> getCertificateTags(long id);
 
-
-    /**
-     * Allows getting certificates sorted, filtered by name or description and by contained tag;
-     * @param sorted if true - sorting by name.
-     * @param desc if true - reverse sorting order.
-     * @param tagName Name of tag which should be included in certificate
-     * @param pattern pattern used for filtering by name or description
-     * @return processed certificates list.
-     */
-    List<Certificate> getFilteredSortedCertificates(boolean sorted, boolean desc, Optional<String> tagName, Optional<String> pattern);
 }

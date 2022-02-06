@@ -5,7 +5,6 @@ import com.epam.ems.response.DefaultExceptionResponse;
 import com.epam.ems.response.ServiceExceptionResponse;
 import com.epam.ems.response.ValidationExceptionResponse;
 import com.epam.ems.service.exception.ServiceException;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@Configuration
 @RestControllerAdvice
 public class AppExceptionHandler extends ResponseEntityExceptionHandler {
 

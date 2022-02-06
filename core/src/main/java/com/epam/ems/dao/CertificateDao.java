@@ -37,4 +37,10 @@ public interface CertificateDao extends BaseDao<Certificate>{
      */
     boolean isCertificateMissingTag(Tag tag, Certificate certificate);
 
+    /**
+     * Allows checking {@link Certificate} existence.
+     * @param id {@link Certificate} id.
+     * @return true - if certificate is found, otherwise false.
+     */
+    boolean isCertificateExistById(long id);
 }

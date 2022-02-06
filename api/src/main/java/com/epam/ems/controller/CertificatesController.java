@@ -4,7 +4,6 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.handler.ValidationHandler;
 import com.epam.ems.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -36,17 +34,10 @@ public class CertificatesController {
     }
 
     @GetMapping
-    public List<Certificate> getCertificates(@RequestParam(name = "sort", defaultValue = "false") boolean sorted,
-                                             @RequestParam(name = "desc", defaultValue = "false") boolean desc,
+    public List<Certificate> getCertificates(@RequestParam(name = "sort") Optional<String> sort,
                                              @RequestParam(name = "tag") Optional<String> tagName,
-                                             @RequestParam(name = "filter") Optional<String> pattern,
-                                             HttpServletResponse response) {
-        List<Certificate> certificates = certificateService.getFilteredSortedCertificates(sorted,desc,tagName,pattern);
-        if (certificates.isEmpty()) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-        }
-        return certificateService.getFilteredSortedCertificates(sorted,desc,tagName,pattern);
-
+                                             @RequestParam(name = "filter") Optional<String> pattern) {
+        return certificateService.getFilteredSortedCertificates(sort, tagName, pattern);
     }
 
 
@@ -56,8 +47,8 @@ public class CertificatesController {
     }
 
     @DeleteMapping("{id}")
-    public void deleteCertificate(@PathVariable long id) {
-        certificateService.deleteCertificate(id);
+    public boolean deleteCertificate(@PathVariable long id) {
+        return certificateService.deleteCertificate(id);
     }
 
     @PostMapping

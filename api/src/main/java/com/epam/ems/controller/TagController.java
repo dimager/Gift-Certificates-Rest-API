@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -57,7 +56,7 @@ public class TagController {
     }
 
     @DeleteMapping("{id}")
-    public boolean deleteTag(@PathVariable long id, HttpServletResponse response) {
+    public boolean deleteTag(@PathVariable long id) {
         return tagService.deleteTag(id);
     }
 }

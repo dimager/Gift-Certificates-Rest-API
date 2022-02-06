@@ -11,6 +11,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestDaoConfig.class, loader = AnnotationConfigContextLoader.class)
@@ -41,7 +45,7 @@ class CertificateDaoImplTest {
         certificate.setName("newName");
         certificate.setDescription("newDescription");
         certificate.setDuration((short) 99);
-        certificate.setPrice(500);
+        certificate.setPrice(new BigDecimal("50.02"));
 
         Assertions.assertAll(() -> Assertions.assertNotEquals(certificate,certificateDao.getById(id)),
                 () -> Assertions.assertEquals(certificate,certificateDao.update(certificate)));
@@ -52,7 +56,7 @@ class CertificateDaoImplTest {
         Certificate newCertificate = new Certificate();
         newCertificate.setName("testCertificate");
         newCertificate.setDescription("description");
-        newCertificate.setPrice(100);
+        newCertificate.setPrice(new BigDecimal(100));
         newCertificate.setDuration((short) 2);
         Certificate certificate = certificateDao.create(newCertificate);
         Assertions.assertAll(

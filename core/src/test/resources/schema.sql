@@ -5,7 +5,7 @@ create table GIFT_CERTIFICATE
     ID               BIGINT auto_increment,
     NAME             VARCHAR(45),
     DESCRIPTION      VARCHAR(255),
-    PRICE            DOUBLE,
+    PRICE            DECIMAL(10,2),
     DURATION         SMALLINT,
     CREATE_DATE      TIMESTAMP,
     LAST_UPDATE_DATE TIMESTAMP,

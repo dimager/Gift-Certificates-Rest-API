@@ -23,15 +23,25 @@ public class CertificateDaoImpl extends NamedParameterJdbcTemplate implements Ce
 
     private static final int ONE_UPDATED_ROW = 1;
     private static final int NO_DB_ENTRY = 0;
-    private static final String SQL_SELECT_BY_ID = "SELECT id, name, description, price, duration, create_date, last_update_date FROM gift_certificate WHERE id=:id";
-    private static final String SQL_SELECT_ALL = "SELECT id, name, description, price, duration, create_date, last_update_date FROM gift_certificate";
-    private static final String SQL_INSERT = "INSERT INTO gift_certificate (name,description,price,duration,create_date,last_update_date) VALUES (:name, :description, :price, :duration, :createDateTime, :lastUpdateDateTime)";
-    private static final String SQL_UPDATE = "UPDATE gift_certificate SET name = :name, description = :description, price = :price, duration = :duration, last_update_date = :lastUpdateDate WHERE id = :id;";
+    private static final String SQL_SELECT_BY_ID = "SELECT id, name, description, price, duration, create_date, last_update_date " +
+            "FROM gift_certificate WHERE id=:id";
+    private static final String SQL_SELECT_ALL = "SELECT id, name, description, price, duration, create_date, last_update_date " +
+            "FROM gift_certificate";
+    private static final String SQL_INSERT = "INSERT INTO gift_certificate (name,description,price,duration,create_date,last_update_date) " +
+            "VALUES (:name, :description, :price, :duration, :createDateTime, :lastUpdateDateTime)";
+    private static final String SQL_UPDATE = "UPDATE gift_certificate " +
+            "SET name = :name, description = :description, price = :price, duration = :duration, last_update_date = :lastUpdateDate " +
+            "WHERE id = :id;";
     private static final String SQL_DELETE = "DELETE FROM gift_certificate WHERE id = :id";
-    private static final String SQL_ADD_TAG_TO_CERTIFICATE = "INSERT INTO gift_certificate_has_tag (gift_certificate_id,tag_id) VALUES (:certificateId, :tagId)";
-    private static final String SQL_DELETE_TAG_FROM_CERTIFICATE = "DELETE FROM gift_certificate_has_tag WHERE gift_certificate_id = :certificateId AND tag_id = :tagId";
-    private static final String SQL_CERTIFICATE_HAS_TAG = "SELECT count(*) FROM gift_certificate_has_tag WHERE gift_certificate_id = :certificateId AND tag_id = :tagId";
-    private static final String SQL_SELECT_TAGS_FOR_CERTIFICATE_BY_ID = "SELECT id, name FROM tag LEFT JOIN gift_certificate_has_tag as gsht on tag.id = gsht.tag_id WHERE gsht.gift_certificate_id = :id";
+    private static final String SQL_ADD_TAG_TO_CERTIFICATE = "INSERT INTO gift_certificate_has_tag (gift_certificate_id,tag_id) " +
+            "VALUES (:certificateId, :tagId)";
+    private static final String SQL_DELETE_TAG_FROM_CERTIFICATE = "DELETE FROM gift_certificate_has_tag " +
+            "WHERE gift_certificate_id = :certificateId AND tag_id = :tagId";
+    private static final String SQL_CERTIFICATE_HAS_TAG = "SELECT count(*) FROM gift_certificate_has_tag " +
+            "WHERE gift_certificate_id = :certificateId AND tag_id = :tagId";
+    private static final String SQL_SELECT_TAGS_FOR_CERTIFICATE_BY_ID = "SELECT id, name FROM tag " +
+            "LEFT JOIN gift_certificate_has_tag as gsht on tag.id = gsht.tag_id " +
+            "WHERE gsht.gift_certificate_id = :id";
     private static final String SQL_SELECT_IS_CERTIFICATE_EXIST = "SELECT COUNT(*) FROM gift_certificate WHERE id = :id";
     private static final String SQL_SELECT_ALL_CERTIFICATES_ID_WITH_TAGS = "select gchs.gift_certificate_id, t.id, t.name " +
             "from gift_certificate_has_tag as gchs left join tag as t on gchs.tag_id = t.id order by gchs.gift_certificate_id";
@@ -95,21 +105,16 @@ public class CertificateDaoImpl extends NamedParameterJdbcTemplate implements Ce
 
     @Override
     public boolean delete(long id) {
-        if (this.isCertificateExistById(id)) {
             MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
             sqlParameterSource.addValue("id", id);
             return this.update(SQL_DELETE, sqlParameterSource) == ONE_UPDATED_ROW;
-        } else {
-            return false;
-        }
     }
 
     @Override
     public List<Tag> getCertificateTags(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
-        List<Tag> tags = this.query(SQL_SELECT_TAGS_FOR_CERTIFICATE_BY_ID, sqlParameterSource, new TagRowMapper());
-        return tags;
+        return this.query(SQL_SELECT_TAGS_FOR_CERTIFICATE_BY_ID, sqlParameterSource, new TagRowMapper());
     }
 
     @Override
@@ -136,7 +141,8 @@ public class CertificateDaoImpl extends NamedParameterJdbcTemplate implements Ce
         return this.queryForObject(SQL_CERTIFICATE_HAS_TAG, sqlParameterSource, Integer.class) == NO_DB_ENTRY;
     }
 
-    private boolean isCertificateExistById(long id) {
+    @Override
+    public boolean isCertificateExistById(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
         return this.queryForObject(SQL_SELECT_IS_CERTIFICATE_EXIST, sqlParameterSource, Integer.class) == ONE_UPDATED_ROW;

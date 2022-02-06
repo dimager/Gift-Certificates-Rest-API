@@ -7,7 +7,7 @@ import java.util.List;
 
 
 /**
- * This interface allows to manage tags.
+ * This interface allows managing tags.
  */
 @Service
 public interface TagService {
@@ -56,18 +56,6 @@ public interface TagService {
      * @return true - if tag is deleted,
      */
     boolean deleteTag(long id);
-
-    /**
-     * This method helps to check tag existence in DB  and update or create it, depends on checking result:
-     * If Tag is existed in DB by id: if needed update name, return tag;
-     * If Tag is not existed in DB by id, check tag existence by name, return tag with id;
-     * Otherwise create tag and return tag.
-     *
-     * @param tag tag
-     * @return tag
-     */
-    Tag checkTagForExistenceInDatabase(Tag tag);
-
 
     /**
      * Allows checking tag existence by name

@@ -6,8 +6,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,8 +21,9 @@ public class Certificate extends BaseEntity implements Comparable<Certificate>{
     @NotEmpty(message = "Description cant be empty")
     @Size(min=1, max = 255, message = "Max description size is 255")
     private String description;
+
     @Positive(message = "Price must be positive")
-    private double price;
+    private BigDecimal price;
     @Positive(message = "Duration must be positive")
     private short duration;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
@@ -54,11 +57,11 @@ public class Certificate extends BaseEntity implements Comparable<Certificate>{
         this.description = description;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -99,7 +102,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate>{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Certificate that = (Certificate) o;
-        return id == that.id && Double.compare(that.price, price) == 0 && duration == that.duration && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(createdDateTime, that.createdDateTime) && Objects.equals(lastUpdatedDateTime, that.lastUpdatedDateTime) && Objects.equals(tags, that.tags);
+        return id == that.id && duration == that.duration && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(price, that.price) && Objects.equals(createdDateTime, that.createdDateTime) && Objects.equals(lastUpdatedDateTime, that.lastUpdatedDateTime) && Objects.equals(tags, that.tags);
     }
 
     @Override
@@ -124,7 +127,8 @@ public class Certificate extends BaseEntity implements Comparable<Certificate>{
 
     @Override
     public int compareTo(Certificate o) {
-        return this.getName().compareTo(o.getName());
+        return Comparator.comparing(Certificate::getName)
+                .thenComparing(Certificate::getCreatedDateTime)
+                .compare(this,o);
     }
 }
-

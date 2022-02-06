@@ -36,13 +36,9 @@ public class TagDaoImpl extends NamedParameterJdbcTemplate implements TagDao {
 
     @Override
     public boolean delete(long id) {
-        if (this.isTagExistById(id)) {
             MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
             sqlParameterSource.addValue("id", id);
             return this.update(SQL_DELETE, sqlParameterSource) == ONE_UPDATED_ROW;
-        } else {
-            return false;
-        }
     }
 
 
@@ -86,22 +82,7 @@ public class TagDaoImpl extends NamedParameterJdbcTemplate implements TagDao {
     }
 
     @Override
-    public Tag checkTagForExistenceInDatabase(Tag tag) {
-        if (this.isTagExistById(tag.getId())) {
-            Tag tagFromDB = this.getById(tag.getId());
-            if (tagFromDB.getName().equals(tag.getName())) {
-                return tagFromDB;
-            } else {
-                return this.update(tag);
-            }
-        } else if (this.isTagExistByName(tag.getName())) {
-            return this.getByName(tag.getName());
-        } else {
-            return this.create(tag);
-        }
-    }
-
-    private boolean isTagExistById(long id) {
+    public boolean isTagExistById(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
         return this.queryForObject(SQL_SELECT_IS_TAG_EXIST_BY_ID, sqlParameterSource, Integer.class) == ONE_UPDATED_ROW;
