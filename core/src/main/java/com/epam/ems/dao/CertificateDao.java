@@ -4,43 +4,26 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-public interface CertificateDao extends BaseDao<Certificate>{
-    /**
-     * Allows getting certificate`s tags.
-     * @param id {@link Certificate} id
-     * @return List of certificate`s tags.
-     */
-    List<Tag> getCertificateTags(long id);
 
-    /**
-     * Allows adding {@link Tag} to {@link Certificate}
-     * @param tag {@link Tag} which should be added.
-     * @param certificate  {@link Certificate} to which this tag should be added.
-     * @return true - if tag successfully added
-     */
-    boolean addTagToCertificate(Tag tag, Certificate certificate);
-
-    /**
-     * Allows removing {@link Tag} from {@link Certificate}
-     * @param tag {@link Tag} which should be removed.
-     * @param certificate  {@link Certificate} from which this tag should be removed.
-     * @return true - if tag successfully removed
-     */
-    boolean removeTagFromCertificate(Tag tag, Certificate certificate);
-
-    /**
-     * Allows checking the relation of the {@link Tag} to the {@link Certificate}
-     * @param tag {@link Tag}
-     * @param certificate {@link Certificate}
-     * @return true - if {@link Certificate} include {@link Tag}, otherwise false.
-     */
-    boolean isCertificateMissingTag(Tag tag, Certificate certificate);
-
+public interface CertificateDao extends BaseDao<Certificate> {
     /**
      * Allows checking {@link Certificate} existence.
+     *
      * @param id {@link Certificate} id.
      * @return true - if certificate is found, otherwise false.
      */
     boolean isCertificateExistById(long id);
+
+    List<Certificate> getCertificatesContainsTags(int size, int offset, Set<Tag> tags);
+
+    Integer getNumberOCertificatesContainsTags(int size, int offset, Set<Tag> tags);
+
+    List<Certificate> getCertificates(int size, int offset, Optional<String> sort,
+                                      Optional<String> filterPattern);
+
+    Integer getCertificatesAmount(int size, int offset, Optional<String> sort,
+                                  Optional<String> filterPattern);
 }

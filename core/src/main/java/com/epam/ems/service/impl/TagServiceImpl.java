@@ -2,10 +2,17 @@ package com.epam.ems.service.impl;
 
 import com.epam.ems.dao.TagDao;
 import com.epam.ems.entity.Tag;
+import com.epam.ems.service.PageService;
 import com.epam.ems.service.TagService;
 import com.epam.ems.service.exception.ServiceException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,30 +27,47 @@ public class TagServiceImpl implements TagService {
     private static final String MSG_TAG_WAS_NOT_CREATED = "30204;Tag was not created. Tag name=";
     private static final String MSG_TAG_WAS_NOT_FOUND_BY_NAME = "30205;Tag was not found by name. Tag name=";
     private static final String MSG_TAG_WAS_NOT_DELETED = "30206;Tag was not deleted. Tag id=";
+    private static final Logger logger = LogManager.getLogger(TagServiceImpl.class);
+    private static final String MSG_TAG_EXIST = "30207;Tag exist. name=";
     private final TagDao tagDao;
+    private PageService pageService;
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao) {
+    public TagServiceImpl(TagDao tagDao, PageService pageService) {
         this.tagDao = tagDao;
+        this.pageService = pageService;
     }
 
 
     @Override
-    public List<Tag> getAllTags() {
+    @Transactional
+    public CollectionModel<Tag> getAllTags(int size, int page, WebMvcLinkBuilder link) {
         try {
-            return tagDao.getAll();
-        } catch (DataAccessException e) {
+            int offset = pageService.getOffset(size, page);
+            long totalSize = tagDao.getNumberOfTags();
+            List<Tag> tags = tagDao.getAll(size, offset);
+            List<Link> links = pageService.createLinks(size, page, totalSize, link);
+            PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
+            return PagedModel.of(tags, metadata, links);
+        } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAGS_WERE_NOT_FOUND, e.getCause());
         }
-
     }
 
+    @Override
+    public Tag getMostPopularTag() {
+        return tagDao.getMostPopularTag();
+    }
 
     @Override
     public Tag getTag(long id) {
         try {
-            return tagDao.getById(id);
-        } catch (DataAccessException e) {
+            if (tagDao.isTagExistById(id)) {
+                return tagDao.getById(id);
+            } else {
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id);
+            }
+        } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id, e.getCause());
         }
     }
@@ -52,8 +76,12 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag updateTag(Tag tag) {
         try {
-            return tagDao.update(tag);
-        } catch (DataAccessException e) {
+            if (tagDao.isTagExistById(tag.getId())) {
+                return tagDao.update(tag);
+            } else {
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId());
+            }
+        } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId(), e.getCause());
         }
     }
@@ -63,22 +91,25 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag createTag(Tag tag) {
         try {
-            if (tagDao.isTagExistByName(tag.getName())) {
-                return tagDao.getByName(tag.getName());
-            } else {
-                return tagDao.create(tag);
-            }
-        } catch (DataAccessException e) {
+            return tagDao.create(tag);
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_TAG_EXIST + tag.getName(), e.getCause());
+
+        } catch (RuntimeException e) {
+            logger.error(e);
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_CREATED + tag.getName(), e.getCause());
         }
     }
 
-
     @Override
     public Tag getTag(String name) {
         try {
-            return tagDao.getByName(name);
-        } catch (DataAccessException e) {
+            if (this.isTagExistByName(name)) {
+                return tagDao.getByName(name);
+            } else {
+                throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND_BY_NAME + name);
+            }
+        } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND_BY_NAME + name, e.getCause());
         }
     }
@@ -93,7 +124,7 @@ public class TagServiceImpl implements TagService {
             } else {
                 throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id);
             }
-        } catch (DataAccessException e) {
+        } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_DELETED + id, e.getCause());
         }
     }

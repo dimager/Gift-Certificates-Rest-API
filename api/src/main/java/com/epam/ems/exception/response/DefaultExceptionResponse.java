@@ -1,4 +1,4 @@
-package com.epam.ems.response;
+package com.epam.ems.exception.response;
 
 import org.springframework.http.HttpStatus;
 
@@ -8,16 +8,20 @@ public class DefaultExceptionResponse {
     private String message;
     private HttpStatus httpStatus;
 
+    public DefaultExceptionResponse() {
+    }
+
+
+    public DefaultExceptionResponse(String message) {
+        this.message = message;
+    }
+
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-    }
-
-    public DefaultExceptionResponse(String message) {
-        this.message = message;
     }
 
     public String getMessage() {
