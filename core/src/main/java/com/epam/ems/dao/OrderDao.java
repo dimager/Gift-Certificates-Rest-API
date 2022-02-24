@@ -7,7 +7,7 @@ import java.util.List;
 public interface OrderDao {
     Order getOrder(long id);
 
-    List<Order> getAllOrders(int size, int page);
+    List<Order> getAllOrders(int size, int offset);
 
     List<Order> getUserOrders(int limit, int offset, long userId);
 

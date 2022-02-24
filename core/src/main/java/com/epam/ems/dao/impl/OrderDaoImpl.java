@@ -63,7 +63,6 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Order createOrder(Order order) {
         entityManager.persist(order);
-        entityManager.flush();
         return order;
     }
 }

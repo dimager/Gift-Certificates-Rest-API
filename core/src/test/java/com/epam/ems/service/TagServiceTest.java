@@ -4,37 +4,33 @@ import com.epam.ems.dao.TagDao;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.exception.ServiceException;
 import com.epam.ems.service.impl.TagServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-
 
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
-
+    @Mock
+    PageService pageService;
     @Mock
     private TagDao tagDao;
-
     private TagService tagService;
     private List<Tag> tags;
     private Tag tag;
-    private DataAccessException dataAccessException = new DataAccessException("message") {
-        @Override
-        public String getMessage() {
-            return super.getMessage();
-        }
-    };
 
     @BeforeEach
     void setUp() {
@@ -46,44 +42,33 @@ class TagServiceTest {
             tags.add(tag);
         }
         tag = tags.get(0);
-        tagService = new TagServiceImpl(tagDao);
+        tagService = new TagServiceImpl(tagDao, pageService);
     }
 
-
-    @Test
-    void getAllTags() {
-        when(tagDao.getAll())
-                .thenReturn(tags)
-                .thenReturn(tags)
-                .thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(tags, tagService.getAllTags()),
-                () -> Assertions.assertTrue(tagService.getAllTags().contains(tag)),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.getAllTags()));
-    }
 
     @Test
     void getTagById() {
-        when(tagDao.getById(tag.getId())).thenReturn(tag).thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(tag, tagDao.getById(tag.getId())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.getTag(tag.getId())));
+        when(tagDao.getById(tag.getId())).thenReturn(tag).thenThrow(ServiceException.class);
+        assertAll(
+                () -> assertEquals(tag, tagDao.getById(tag.getId())),
+                () -> assertThrows(ServiceException.class, () -> tagService.getTag(tag.getId())));
     }
 
     @Test
     void updateTag() {
         String newName = "newTagName";
+        when(tagDao.isTagExistById(anyLong())).thenReturn(true);
         when(tagDao.update(tag))
                 .thenAnswer((Answer<Tag>) invocation -> {
                     Tag tag = invocation.getArgument(0, Tag.class);
                     tag.setName(newName);
                     return tag;
                 })
-                .thenThrow(dataAccessException);
+                .thenThrow(ServiceException.class);
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(newName, tagService.updateTag(tag).getName()),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.updateTag(tag)));
+        assertAll(
+                () -> assertEquals(newName, tagService.updateTag(tag).getName()),
+                () -> assertThrows(ServiceException.class, () -> tagService.updateTag(tag)));
     }
 
     @Test
@@ -93,28 +78,27 @@ class TagServiceTest {
         tag.setName("testTag");
         tag.setId(generatedId);
 
-        when(tagDao.isTagExistByName(any())).thenReturn(true).thenReturn(false).thenThrow(dataAccessException);
-        when(tagDao.getByName(any())).thenReturn(tag);
-        when(tagDao.create(tag)).thenReturn(tag);
+        when(tagDao.create(tag)).thenReturn(tag).thenThrow(DataIntegrityViolationException.class);
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(tag, tagService.createTag(tag)),
-                () -> Assertions.assertEquals(tag,tagService.createTag(tag)),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.createTag(tag)));
+        assertAll(
+                () -> assertEquals(tag, tagService.createTag(tag)),
+                () -> assertThrows(ServiceException.class, () -> tagService.createTag(tag)));
     }
+/*
 
     @Test
     void getTagByName() {
         String tagName = "tagname3";
+        when(tagDao.isTagExistById(anyLong())).thenReturn(true);
         when(tagDao.getByName(tagName))
                 .thenAnswer((Answer<Tag>) invocation -> {
                     String name = invocation.getArgument(0, String.class);
                     return tags.stream().filter(tag -> tag.getName().equals(name)).findFirst().get();
-                })
-                .thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(tags.contains(tagService.getTag(tagName))),
-                () -> Assertions.assertThrows(ServiceException.class, () -> tagService.getTag(tagName)));
+                });
+        assertAll(
+                () -> assertTrue(tags.contains(tagService.getTag(tagName))));
     }
+*/
+
 
 }

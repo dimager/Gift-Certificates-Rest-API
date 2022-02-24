@@ -1,16 +1,12 @@
 package com.epam.ems;
 
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-
-@SpringBootConfiguration()
-@ComponentScan("com.epam.ems")
-@EnableAutoConfiguration
+@TestConfiguration
 @EnableTransactionManagement
+@ComponentScan("com.epam.ems")
 public class TestDaoConfig {
-
 
 }

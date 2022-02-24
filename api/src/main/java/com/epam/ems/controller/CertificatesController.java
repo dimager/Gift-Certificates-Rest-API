@@ -1,7 +1,6 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.entity.Certificate;
-import com.epam.ems.entity.CertificateDurationOnly;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,12 +97,11 @@ public class CertificatesController {
     }
 
     @PatchMapping(path = "{id}")
-    public ResponseEntity<CertificateDurationOnly> updateCertificate(@PathVariable long id, @RequestBody @Valid CertificateDurationOnly durationOnly) {
-        if (certificateService.updateDuration(id, durationOnly)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public Certificate updateCertificateDuration(@PathVariable long id, @RequestBody Certificate certificate) {
+        certificateService.updateDuration(id, certificate);
+        certificate = certificateService.getCertificate(id);
+        this.createLinks(certificate);
+        return certificate;
     }
 }
 

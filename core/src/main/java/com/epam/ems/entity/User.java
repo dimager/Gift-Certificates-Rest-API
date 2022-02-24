@@ -34,6 +34,11 @@ public class User extends BaseEntity {
     public User() {
     }
 
+    public User(long id, String username) {
+        this.id = id;
+        this.username = username;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
@@ -59,7 +64,6 @@ public class User extends BaseEntity {
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", orders=" + orders +
                 '}';
     }
 

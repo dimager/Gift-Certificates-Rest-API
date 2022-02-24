@@ -24,6 +24,6 @@ public interface CertificateDao extends BaseDao<Certificate> {
     List<Certificate> getCertificates(int size, int offset, Optional<String> sort,
                                       Optional<String> filterPattern);
 
-    Integer getCertificatesAmount(int size, int offset, Optional<String> sort,
+    Integer getCertificatesAmount(Optional<String> sort,
                                   Optional<String> filterPattern);
 }

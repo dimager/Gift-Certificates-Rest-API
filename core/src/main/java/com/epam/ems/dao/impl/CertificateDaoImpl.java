@@ -109,12 +109,12 @@ public class CertificateDaoImpl implements CertificateDao {
                                              Optional<String> filterPattern) {
 
         TypedQuery<Certificate> tq = getCertificatesTypedQuery(sort, filterPattern);
-        return tq.getResultList();
+        return tq.setMaxResults(size).setFirstResult(offset).getResultList();
     }
 
 
     @Override
-    public Integer getCertificatesAmount(int size, int offset, Optional<String> sort,
+    public Integer getCertificatesAmount( Optional<String> sort,
                                          Optional<String> filterPattern) {
 
         TypedQuery<Certificate> tq = getCertificatesTypedQuery(sort, filterPattern);

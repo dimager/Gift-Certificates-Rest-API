@@ -38,6 +38,7 @@ public class TagController {
                                            @RequestParam(name = "page", defaultValue = "1") int page) {
         CollectionModel<Tag> tags = tagService.getAllTags(size, page, linkTo(TagController.class));
         for (Tag tag : tags.getContent()) {
+            System.out.println(tag);
             this.createLinks(tag);
         }
         return tags;
@@ -72,7 +73,7 @@ public class TagController {
         return tag;
     }
 
-    @GetMapping("mostpopulattag")
+    @GetMapping("mostpopular")
     public Tag mostPopuparTag() {
         Tag tag = tagService.getMostPopularTag();
         this.createLinks(tag);

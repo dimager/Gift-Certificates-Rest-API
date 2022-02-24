@@ -101,8 +101,6 @@ public class Order extends BaseEntity {
                 "id=" + id +
                 ", purchaseDate=" + purchaseDate +
                 ", cost=" + cost +
-                ", user=" + user +
-                ", orderCertificates=" + orderCertificates +
                 '}';
     }
 

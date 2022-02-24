@@ -2,53 +2,84 @@ package com.epam.ems.dao;
 
 import com.epam.ems.TestDaoConfig;
 import com.epam.ems.entity.Certificate;
-import com.epam.ems.entity.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestDaoConfig.class, loader = AnnotationConfigContextLoader.class)
+@SpringBootTest(classes = TestDaoConfig.class)
+@Transactional
 class CertificateDaoImplTest {
-
-    @Autowired
-    private TagDao tagDao;
 
     @Autowired
     private CertificateDao certificateDao;
 
     @Test
     void getAll() {
-        Assertions.assertTrue(certificateDao.getAll().size() > 480);
+        int pageSize = 15;
+        assertEquals(pageSize, certificateDao.getAll(pageSize, 0).size());
     }
+
 
     @Test
     void getById() {
-        Assertions.assertAll(
-                () -> Assertions.assertNotNull(certificateDao.getById(400)),
-                () -> Assertions.assertThrows(Exception.class, () -> certificateDao.getById(-1)));
+        assertAll(
+                () -> assertNotNull(certificateDao.getById(123)),
+                () -> assertThrows(Exception.class, () -> certificateDao.getById(-1)));
+    }
+
+    @Test
+    void isCertificateExistById() {
+        assertAll(
+                () -> assertTrue(certificateDao.isCertificateExistById(1)),
+                () -> assertFalse(certificateDao.isCertificateExistById(-1)));
+    }
+
+    @Test
+    void getCertificates() {
+        String filterPatter = "111";
+        List<Certificate> list = certificateDao.getCertificates(100, 0, Optional.empty(), Optional.of(filterPatter));
+        assertAll(() -> assertTrue(certificateDao.getCertificatesAmount(Optional.empty(), Optional.of(filterPatter)) > 0),
+                () -> assertEquals(
+                        list.size(),
+                        list.stream()
+                                .filter(certificate -> certificate.getDescription().contains(filterPatter) || certificate.getName().contains(filterPatter))
+                                .collect(Collectors.toList())
+                                .size()));
+        ;
     }
 
     @Test
     void update() {
-        long id = 160;
-        Certificate certificate = certificateDao.getById(160);
-        certificate.setName("newName");
-        certificate.setDescription("newDescription");
+        long id = 161;
+        String newName = "updatedName";
+        String newDescription = "updatedDescription";
+        Certificate certificate = certificateDao.getById(id);
+        assertAll(() -> Assertions.assertNotEquals(newName, certificate.getName()),
+                () -> Assertions.assertNotEquals(newDescription, certificate.getDescription()));
+        certificate.setName(newName);
+        certificate.setDescription(newDescription);
         certificate.setDuration((short) 99);
         certificate.setPrice(new BigDecimal("50.02"));
-
-        Assertions.assertAll(() -> Assertions.assertNotEquals(certificate,certificateDao.getById(id)),
-                () -> Assertions.assertEquals(certificate,certificateDao.update(certificate)));
+        certificateDao.update(certificate);
+        Certificate finalCertificate = certificateDao.getById(id);
+        ;
+        assertAll(() -> assertEquals(finalCertificate.getName(), newName),
+                () -> assertEquals(finalCertificate.getDescription(), newDescription));
     }
 
     @Test
@@ -59,50 +90,18 @@ class CertificateDaoImplTest {
         newCertificate.setPrice(new BigDecimal(100));
         newCertificate.setDuration((short) 2);
         Certificate certificate = certificateDao.create(newCertificate);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(certificate.getId() != 0));
+        Certificate certFroDB = certificateDao.getById(certificate.getId());
+        assertAll(
+                () -> assertTrue(certificate.getId() != 0),
+                () -> assertEquals(certificate, certFroDB));
     }
 
     @Test
     void delete() {
         long testCertificateId = 123;
-        Assertions.assertAll(
-                () -> Assertions.assertInstanceOf(Certificate.class,certificateDao.getById(testCertificateId)),
-                () -> Assertions.assertTrue(certificateDao.delete(testCertificateId)));
+        assertAll(
+                () -> Assertions.assertInstanceOf(Certificate.class, certificateDao.getById(testCertificateId)),
+                () -> assertTrue(certificateDao.delete(testCertificateId)));
     }
 
-
-    @Test
-    void getCertificatesTags() {
-        long testCertificateId = 110;
-        Assertions.assertAll(
-                () -> Assertions.assertFalse(certificateDao.getCertificateTags(testCertificateId).isEmpty()));
-    }
-
-    @Test
-    void addTagToCertificate() {
-        long testCertificateId = 110;
-        long testTagId = 10;
-        Tag tag = tagDao.getById(testTagId);
-        Certificate certificate = certificateDao.getById(testCertificateId);
-
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(certificateDao.isCertificateMissingTag(tag, certificate)),
-                () -> Assertions.assertTrue(certificateDao.addTagToCertificate(tag, certificate)),
-                () -> Assertions.assertFalse(certificateDao.isCertificateMissingTag(tag, certificate)));
-    }
-
-    @Test
-    void removeTagFromCertificate() {
-        long testCertificateId = 115;
-        long testTagId = 20;
-        Tag tag = tagDao.getById(testTagId);
-        Certificate certificate = certificateDao.getById(testCertificateId);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(certificateDao.getById(testCertificateId).getTags().contains(tag)),
-                () -> Assertions.assertFalse(certificateDao.isCertificateMissingTag(tag, certificate)),
-                () -> Assertions.assertTrue(certificateDao.removeTagFromCertificate(tag, certificate)),
-                () -> Assertions.assertFalse(certificateDao.getById(testCertificateId).getTags().contains(tag)),
-                () -> Assertions.assertTrue(certificateDao.isCertificateMissingTag(tag, certificateDao.getById(testCertificateId))));
-    }
 }

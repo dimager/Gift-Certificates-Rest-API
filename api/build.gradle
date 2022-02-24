@@ -15,6 +15,7 @@ repositories {
 
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
@@ -29,9 +30,6 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'mysql:mysql-connector-java'
     implementation 'com.github.java-json-tools:json-patch:1.13'
-
-
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 }

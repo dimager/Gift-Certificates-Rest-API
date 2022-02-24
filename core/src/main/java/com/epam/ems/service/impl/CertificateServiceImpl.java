@@ -2,7 +2,6 @@ package com.epam.ems.service.impl;
 
 import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.entity.Certificate;
-import com.epam.ems.entity.CertificateDurationOnly;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
 import com.epam.ems.service.PageService;
@@ -58,7 +57,7 @@ public class CertificateServiceImpl implements CertificateService {
             HashMap<String, String> extraParams = new HashMap<>();
             long totalSize;
             int offset = pageService.getOffset(size, page);
-            totalSize = certificateDao.getCertificatesAmount(size, offset, sort, filterPattern);
+            totalSize = certificateDao.getCertificatesAmount(sort, filterPattern);
             certificates = certificateDao.getCertificates(size, offset, sort, filterPattern);
             sort.ifPresent(s -> extraParams.put("sort", s));
             filterPattern.ifPresent(s -> extraParams.put("filter", s));
@@ -78,6 +77,7 @@ public class CertificateServiceImpl implements CertificateService {
             PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
             return PagedModel.of(certificates, metadata, links);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATES_WERE_NOT_FOUND, e.getCause());
         }
     }
@@ -143,11 +143,12 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     @Transactional
-    public boolean updateDuration(long id, CertificateDurationOnly durationOnly) {
+    public boolean updateDuration(long id, Certificate durationOnly) {
         try {
             if (certificateDao.isCertificateExistById(id)) {
                 Certificate certificate = certificateDao.getById(id);
                 certificate.setDuration(durationOnly.getDuration());
+                certificate.setLastUpdatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
                 certificateDao.update(certificate);
                 return certificateDao.getById(id).getDuration() == durationOnly.getDuration();
             } else {

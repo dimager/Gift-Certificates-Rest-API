@@ -1,20 +1,16 @@
 package com.epam.ems.service;
 
+
 import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
-import com.epam.ems.service.CertificateService;
-import com.epam.ems.service.TagService;
 import com.epam.ems.service.exception.ServiceException;
 import com.epam.ems.service.impl.CertificateServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
-import org.springframework.dao.DataAccessException;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -22,10 +18,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,14 +38,9 @@ class CertificateServiceTest {
     private CertificateService certificateService;
     private List<Certificate> certificates;
     private Certificate certificate;
+    @Mock
+    private PageService pageService;
 
-
-    private DataAccessException dataAccessException = new DataAccessException("message") {
-        @Override
-        public String getMessage() {
-            return super.getMessage();
-        }
-    };
 
     @BeforeEach
     void setUp() {
@@ -62,23 +55,40 @@ class CertificateServiceTest {
             certificate.setCreatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
             certificate.setLastUpdatedDateTime(Timestamp.valueOf(LocalDateTime.now()));
             for (int j = 1; j <= 5; j++) {
-                certificate.getTags().add(new Tag(j, "name" + j));
+                Tag t = new Tag();
+                t.setId(j);
+                t.setName("name" + j);
+                certificate.getTags().add(t);
             }
             certificates.add(certificate);
         }
         certificate = certificates.get(1);
-        certificateService = new CertificateServiceImpl(certificateDao, tagService);
+        certificateService = new CertificateServiceImpl(certificateDao, tagService, pageService);
+    }
+
+    @Test
+    void updateDuration() {
+        when(certificateDao.isCertificateExistById(anyLong())).thenReturn(true);
+        when(certificateDao.getById(anyLong())).thenReturn(certificate);
+        when(certificateDao.update(any())).thenReturn(certificate);
+
+        Certificate certificateDuration = new Certificate();
+        certificate.setDuration((short) 100);
+
+        assertAll(() -> assertTrue(certificateService.updateDuration(anyLong(), certificateDuration)),
+                () -> assertEquals(certificateDuration.getDuration(), certificate.getDuration()));
     }
 
 
     @Test
     void getCertificate() {
+        when(certificateDao.isCertificateExistById(anyLong())).thenReturn(true);
         when(certificateDao.getById(anyLong()))
                 .thenReturn(certificate)
-                .thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(certificate, certificateService.getCertificate(anyLong())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.getCertificate(anyLong())));
+                .thenThrow(ServiceException.class);
+        assertAll(
+                () -> assertEquals(certificate, certificateService.getCertificate(anyLong())),
+                () -> assertThrows(ServiceException.class, () -> certificateService.getCertificate(anyLong())));
     }
 
     @Test
@@ -86,24 +96,23 @@ class CertificateServiceTest {
         when(certificateDao.isCertificateExistById(anyLong())).thenReturn(true).thenReturn(false);
         when(certificateDao.delete(anyLong()))
                 .thenReturn(true)
-                .thenReturn(false)
-                .thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(certificateService.deleteCertificate(anyLong())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.deleteCertificate(anyLong())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.deleteCertificate(anyLong())));
+                .thenReturn(false);
+        assertAll(
+                () -> assertTrue(certificateService.deleteCertificate(anyLong())),
+                () -> assertThrows(ServiceException.class, () -> certificateService.deleteCertificate(anyLong())));
     }
 
     @Test
     void updateCertificate() {
 
-        when(certificateDao.update(certificate)).thenReturn(certificate);
+        when(certificateDao.update(any())).thenReturn(certificate);
         when(tagService.createTag(any(Tag.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(certificateService.getCertificateTags(certificate.getId())).thenReturn(certificate.getTags());
-        when(certificateDao.isCertificateMissingTag(any(Tag.class),any(Certificate.class))).thenReturn(true);
+        when(certificateDao.isCertificateExistById(anyLong())).thenReturn(true).thenReturn(false);
+        when(certificateDao.getById(anyLong())).thenReturn(certificate);
 
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(certificate, certificateService.updateCertificate(certificate)));
+        assertAll(
+                () -> assertEquals(certificate, certificateService.updateCertificate(certificate)),
+                () -> assertThrows(ServiceException.class, () -> certificateService.updateCertificate(certificate)));
     }
 
     @Test
@@ -112,20 +121,12 @@ class CertificateServiceTest {
                 .thenReturn(certificate);
 
         Certificate createdCertificate = certificateService.createCertificate(certificate);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(createdCertificate.getCreatedDateTime()
+        assertAll(
+                () -> assertTrue(createdCertificate.getCreatedDateTime()
                         .after(Timestamp.valueOf(LocalDateTime.now().minusSeconds(5)))),
-                () -> Assertions.assertTrue(createdCertificate.getLastUpdatedDateTime()
+                () -> assertTrue(createdCertificate.getLastUpdatedDateTime()
                         .after(Timestamp.valueOf(LocalDateTime.now().minusSeconds(5)))));
     }
 
-    @Test
-    void getCertificateTags() {
-        when(certificateDao.getCertificateTags(anyLong()))
-                .thenReturn(certificate.getTags())
-                .thenThrow(dataAccessException);
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(certificate.getTags(), certificateService.getCertificateTags(certificate.getId())),
-                () -> Assertions.assertThrows(ServiceException.class, () -> certificateService.getCertificateTags(anyLong())));
-    }
+
 }

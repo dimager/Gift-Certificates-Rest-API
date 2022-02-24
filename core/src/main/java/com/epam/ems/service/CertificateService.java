@@ -1,7 +1,6 @@
 package com.epam.ems.service;
 
 import com.epam.ems.entity.Certificate;
-import com.epam.ems.entity.CertificateDurationOnly;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
@@ -63,7 +62,7 @@ public interface CertificateService {
     Certificate createCertificate(Certificate certificate);
 
 
-    boolean updateDuration(long id, CertificateDurationOnly durationOnly);
+    boolean updateDuration(long id, Certificate durationOnly);
 
     boolean isCertificateExist(long id);
 }
