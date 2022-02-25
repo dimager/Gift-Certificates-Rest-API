@@ -4,6 +4,7 @@ import com.epam.ems.TestDaoConfig;
 import com.epam.ems.entity.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @SpringBootTest(classes = TestDaoConfig.class)
-@Transactional
+@EnableAutoConfiguration
 class OrderDaoImplTest {
     @Autowired
     private OrderDao orderDao;

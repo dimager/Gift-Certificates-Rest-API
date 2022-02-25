@@ -1,5 +1,6 @@
 package com.epam.ems;
 
+import com.epam.ems.config.ResourceConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigurationImportSelector;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,9 +28,9 @@ import javax.sql.DataSource;
 
 
 @Configuration
-@EnableTransactionManagement
 @ActiveProfiles("core")
-@ComponentScan("com.epam.ems")
+@Import(ResourceConfiguration.class)
+@EntityScan("com.epam.ems.entity")
 public class TestDaoConfig {
 
     /*@Bean
