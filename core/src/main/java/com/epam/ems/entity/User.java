@@ -26,9 +26,6 @@ import java.util.Objects;
 @Entity
 @EntityListeners(AuditListener.class)
 @Table(name = "users")
-@NamedQueries({
-        @NamedQuery(name = "User.existsByIdEquals", query = "select (count(u) > 0) from User u where u.id = :id")
-})
 public class User extends BaseEntity {
 
     public User() {

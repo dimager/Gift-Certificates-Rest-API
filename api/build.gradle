@@ -49,7 +49,7 @@ war {
 
 
 application{
-    mainClassName = 'com.epam.ems.Main'
+    mainClassName = 'com.epam.ems.CertificateApplication'
 }
 
 task copyWar(type: Copy) {

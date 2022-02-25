@@ -13,9 +13,13 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 
-
 @Repository
 public class TagDaoImpl implements TagDao {
+    private static final String FIND_BY_ID_EQUALS = "select t from Tag t where t.id = :id";
+    private static final String COUNT_ALL_TAGS = "select count(t) from Tag t";
+    private static final String FIND_ALL = "select t from Tag t";
+    private static final String FIND_BY_NAME_EQUALS = "select t from Tag t where t.name = :name";
+    private static final String EXISTS_BY_NAME_EQUALS = "select (count(t) > 0) from Tag t where t.name = :name";
     private static final Logger logger = LogManager.getLogger(TagDaoImpl.class);
     private static final String SQL_SELECT_MOST_POPULAR_TAG =
             "select t.tag_id, t.name, sum(oc.amount) as totaltags, o.user_id, t1.totalcost from tags as t " +
@@ -44,21 +48,21 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> getAll(int limit, int offset) {
-        return entityManager.createNamedQuery("Tag.findAll", Tag.class).setMaxResults(limit).setFirstResult(offset).getResultList();
+        return entityManager.createQuery(FIND_ALL, Tag.class).setMaxResults(limit).setFirstResult(offset).getResultList();
     }
 
     @Override
     public Tag getById(long id) {
         logger.error(entityManager.getEntityManagerFactory().getMetamodel().getEntities());
         logger.error(entityManager.getEntityGraphs(Tag.class));
-        TypedQuery<Tag> typedQuery = entityManager.createNamedQuery("Tag.findByIdEquals", Tag.class);
+        TypedQuery<Tag> typedQuery = entityManager.createQuery(FIND_BY_ID_EQUALS, Tag.class);
         typedQuery.setParameter("id", id);
         return typedQuery.getSingleResult();
     }
 
     @Override
     public Long getNumberOfTags() {
-        return entityManager.createNamedQuery("Tag.countBy", Long.class).getSingleResult();
+        return entityManager.createQuery(COUNT_ALL_TAGS, Long.class).getSingleResult();
     }
 
     @Override
@@ -84,7 +88,7 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag getByName(String name) {
-        TypedQuery<Tag> typedQuery = entityManager.createNamedQuery("Tag.findByNameEquals", Tag.class);
+        TypedQuery<Tag> typedQuery = entityManager.createQuery(FIND_BY_NAME_EQUALS, Tag.class);
         typedQuery.setParameter("name", name);
         return typedQuery.getSingleResult();
     }
@@ -97,7 +101,7 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public boolean isTagExistByName(String name) {
-        TypedQuery<Boolean> typedQuery = entityManager.createNamedQuery("Tag.existsByNameEquals", Boolean.class);
+        TypedQuery<Boolean> typedQuery = entityManager.createQuery(EXISTS_BY_NAME_EQUALS, Boolean.class);
         typedQuery.setParameter("name", name);
         return typedQuery.getSingleResult();
     }

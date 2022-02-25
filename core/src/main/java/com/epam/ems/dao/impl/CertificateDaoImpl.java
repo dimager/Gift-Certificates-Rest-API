@@ -31,6 +31,12 @@ public class CertificateDaoImpl implements CertificateDao {
     private final static String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
     private final static String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
     private static final String MSG_SORT_TYPE_NOT_FOUND = "30406;Sort type was not found";
+    private final static String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
+    private final static String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
+    private final static String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
+    private final static String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
+    private final static String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in :tags and c.isArchived = false group by c.id having count(c.id) = :amount";
+
 
     private EntityManager entityManager;
 
@@ -43,7 +49,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public boolean delete(long id) {
-        Query query = entityManager.createNamedQuery("Certificate.updateIsArchivedById");
+        Query query = entityManager.createQuery(UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE);
         query.setParameter("id", id);
         return query.executeUpdate() == 1;
     }
@@ -51,7 +57,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public List<Certificate> getAll(int limit, int offset) {
-        return entityManager.createNamedQuery("Certificate.findByIsArchivedFalse", Certificate.class)
+        return entityManager.createQuery(FIND_ALL_CERTIFICATES, Certificate.class)
                 .setFirstResult(offset)
                 .setMaxResults(limit)
                 .getResultList();
@@ -59,7 +65,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public Certificate getById(long id) {
-        TypedQuery<Certificate> query = entityManager.createNamedQuery("Certificate.findByIdEqualsAndIsArchivedFalse", Certificate.class);
+        TypedQuery<Certificate> query = entityManager.createQuery(FIND_BY_ID, Certificate.class);
         query.setParameter("id", id);
         return query.getSingleResult();
     }
@@ -81,14 +87,14 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public boolean isCertificateExistById(long id) {
-        TypedQuery<Boolean> query = entityManager.createNamedQuery("Certificate.existsByIdEqualsAndIsArchivedFalse", Boolean.class);
+        TypedQuery<Boolean> query = entityManager.createQuery(EXISTS_BY_ID, Boolean.class);
         query.setParameter("id", id);
         return query.getSingleResult();
     }
 
     @Override
     public List<Certificate> getCertificatesContainsTags(int size, int offset, Set<Tag> tags) {
-        TypedQuery<Certificate> typedQuery = entityManager.createNamedQuery("Certificate.findByTagsIn", Certificate.class);
+        TypedQuery<Certificate> typedQuery = entityManager.createQuery(FIND_CERTIFICATES_BY_TAG_IN, Certificate.class);
         typedQuery.setParameter("tags", tags);
         typedQuery.setParameter("amount", (long) tags.size());
         return typedQuery.setMaxResults(size)
@@ -98,7 +104,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public Integer getNumberOCertificatesContainsTags(int size, int offset, Set<Tag> tags) {
-        TypedQuery<Certificate> typedQuery = entityManager.createNamedQuery("Certificate.findByTagsIn", Certificate.class);
+        TypedQuery<Certificate> typedQuery = entityManager.createQuery(FIND_CERTIFICATES_BY_TAG_IN, Certificate.class);
         typedQuery.setParameter("tags", tags);
         typedQuery.setParameter("amount", (long) tags.size());
         return typedQuery.getResultList().size();
@@ -114,7 +120,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
 
     @Override
-    public Integer getCertificatesAmount( Optional<String> sort,
+    public Integer getCertificatesAmount(Optional<String> sort,
                                          Optional<String> filterPattern) {
 
         TypedQuery<Certificate> tq = getCertificatesTypedQuery(sort, filterPattern);

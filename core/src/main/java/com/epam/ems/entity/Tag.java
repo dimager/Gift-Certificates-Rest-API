@@ -24,15 +24,7 @@ import java.util.Set;
 @Entity
 @EntityListeners(AuditListener.class)
 @Table(name = "tags")
-@NamedQueries({
-        @NamedQuery(name = "Tag.findByIdEquals", query = "select t from Tag t where t.id = :id"),
-        @NamedQuery(name = "Tag.existsByIdEquals", query = "select (count(t) > 0) from Tag t where t.id = :id"),
-        @NamedQuery(name = "Tag.deleteByIdEquals", query = "delete from Tag t where t.id = :id"),
-        @NamedQuery(name = "Tag.countBy", query = "select count(t) from Tag t"),
-        @NamedQuery(name = "Tag.findAll", query = "select t from Tag t"),
-        @NamedQuery(name = "Tag.findByNameEquals", query = "select t from Tag t where t.name = :name"),
-        @NamedQuery(name = "Tag.existsByNameEquals", query = "select (count(t) > 0) from Tag t where t.name = :name")
-})
+
 public class Tag extends BaseEntity {
 
     @Id
@@ -89,6 +81,5 @@ public class Tag extends BaseEntity {
                 ", name='" + name + '\'' +
                 '}';
     }
-
 
 }

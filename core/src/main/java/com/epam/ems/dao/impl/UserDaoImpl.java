@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NamedQuery;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import java.util.List;
 public class UserDaoImpl implements UserDao {
     private final static String SELECT_USER_BY_ID = "SELECT u FROM User u where u.id = :id";
     private final static String SELECT_ALL_USERS = "SELECT u FROM User u";
+    private final static String EXISTS_BY_ID_EQUALS = "select (count(u) > 0) from User u where u.id = :id";
+
     private EntityManager entityManager;
 
     @Autowired
@@ -37,7 +40,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean isUserExist(long id) {
-        TypedQuery<Boolean> typedQuery = entityManager.createNamedQuery("User.existsByIdEquals", Boolean.class);
+        TypedQuery<Boolean> typedQuery = entityManager.createQuery(EXISTS_BY_ID_EQUALS, Boolean.class);
         typedQuery.setParameter("id", id);
         return typedQuery.getSingleResult();
     }

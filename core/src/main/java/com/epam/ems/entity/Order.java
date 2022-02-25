@@ -33,14 +33,6 @@ import java.util.Objects;
 @Entity
 @EntityListeners(AuditListener.class)
 @Table(name = "orders")
-@NamedQueries({
-        @NamedQuery(name = "Order.findByIdEquals", query = "select o from Order o where o.id = :id"),
-        @NamedQuery(name = "Order.findByUser_IdEquals", query = "select o from Order o where o.user.id = :id"),
-        @NamedQuery(name = "Order.existsByIdEquals", query = "select (count(o) > 0) from Order o where o.id = :id"),
-        @NamedQuery(name = "Order.findAll", query = "select o from Order o"),
-        @NamedQuery(name = "Order.countByUser_IdEquals", query = "select count(o) from Order o where o.user.id = :id"),
-        @NamedQuery(name = "Order.countBy", query = "select count(o) from Order o")
-})
 
 public class Order extends BaseEntity {
     private static final Logger logger = LogManager.getLogger(Order.class);

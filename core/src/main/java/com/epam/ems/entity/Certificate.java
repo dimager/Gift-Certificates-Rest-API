@@ -36,15 +36,6 @@ import java.util.Set;
 @Entity
 @Table(name = "certificates")
 @EntityListeners(AuditListener.class)
-@NamedQueries({
-        @NamedQuery(name = "Certificate.updateIsArchivedById", query = "update Certificate c set c.isArchived = true where c.id = :id"),
-        @NamedQuery(name = "Certificate.findByIsArchivedFalse", query = "select c from Certificate c where c.isArchived = false"),
-        @NamedQuery(name = "Certificate.findByIdEqualsAndIsArchivedFalse", query = "select c from Certificate c where c.id = :id and c.isArchived = false"),
-        @NamedQuery(name = "Certificate.existsByIdEqualsAndIsArchivedFalse", query = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false"),
-        @NamedQuery(name = "Certificate.countBy", query = "select count(c) from Certificate c where c.isArchived = false"),
-        @NamedQuery(name = "Certificate.findByTagsIn", query = "select c from Certificate c join c.tags t where t in :tags and c.isArchived = false group by c.id having count(c.id) = :amount"),
-        @NamedQuery(name = "Certificate.countByTagsIn", query = "select c from Certificate c join c.tags t where t in :tags and c.isArchived = false group by c.id having count(c.id) = :amount")
-})
 public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
