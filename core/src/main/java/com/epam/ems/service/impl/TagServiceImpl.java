@@ -27,10 +27,9 @@ public class TagServiceImpl implements TagService {
     private static final String MSG_TAG_WAS_NOT_CREATED = "30204;Tag was not created. Tag name=";
     private static final String MSG_TAG_WAS_NOT_FOUND_BY_NAME = "30205;Tag was not found by name. Tag name=";
     private static final String MSG_TAG_WAS_NOT_DELETED = "30206;Tag was not deleted. Tag id=";
-    private static final Logger logger = LogManager.getLogger(TagServiceImpl.class);
     private static final String MSG_TAG_EXIST = "30207;Tag exist. name=";
     private final TagDao tagDao;
-    private PageService pageService;
+    private final PageService pageService;
 
     @Autowired
     public TagServiceImpl(TagDao tagDao, PageService pageService) {
@@ -96,7 +95,6 @@ public class TagServiceImpl implements TagService {
             throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_TAG_EXIST + tag.getName(), e.getCause());
 
         } catch (RuntimeException e) {
-            logger.error(e);
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_CREATED + tag.getName(), e.getCause());
         }
     }

@@ -33,7 +33,14 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-
+    /**
+     * Allows getting list of all orders or user orders
+     *
+     * @param size   - number of order per page
+     * @param page   - number of page
+     * @param userId - user id
+     * @return list of certificates
+     */
     @GetMapping()
     public CollectionModel<Order> getOrders(@RequestParam(name = "size", defaultValue = "10") int size,
                                             @RequestParam(name = "page", defaultValue = "1") int page,
@@ -43,6 +50,12 @@ public class OrderController {
         return orders;
     }
 
+    /**
+     * Allows getting order
+     *
+     * @param id order id
+     * @return order
+     */
     @GetMapping("{id}")
     public Order getOrder(@PathVariable long id) {
         Order order = orderService.getOrder(id);
@@ -73,6 +86,13 @@ public class OrderController {
         }
     }
 
+    /**
+     * Allows creating order for user
+     *
+     * @param userId user id
+     * @param order  order data
+     * @return created certificate with id
+     */
     @PostMapping
     public Order createOrder(@RequestParam(required = false) Optional<Long> userId, @RequestBody @Valid Order order) {
         order = orderService.createOrder(userId.get(), order);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -20,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@SpringBootTest(classes = TestDaoConfig.class)
-@Transactional
+@SpringBootTest(classes = {TestDaoConfig.class})
 class OrderDaoImplTest {
     @Autowired
     private OrderDao orderDao;
@@ -56,6 +56,7 @@ class OrderDaoImplTest {
     }
 
     @Test
+    @Transactional
     void createOrder() {
         long orderId = 202;
         Order order = orderDao.getOrder(orderId);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -17,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@SpringBootTest(classes = TestDaoConfig.class)
-@Transactional
+@SpringBootTest(classes = {TestDaoConfig.class})
 class TagDaoImplTest {
     @Autowired
     private TagDao tagDao;
 
     @Test
+    @Transactional
     void delete() {
         long tagId = 100;
         assertAll(() -> assertDoesNotThrow(() -> tagDao.getById(tagId)),
@@ -44,6 +45,7 @@ class TagDaoImplTest {
     }
 
     @Test
+    @Transactional
     void create() {
         Tag tag = new Tag("testTag");
         assertAll(
@@ -53,6 +55,7 @@ class TagDaoImplTest {
     }
 
     @Test
+    @Transactional
     void update() {
         Tag tag = tagDao.getById(200);
         tag.setName("newName");

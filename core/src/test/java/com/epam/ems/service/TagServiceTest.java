@@ -48,9 +48,10 @@ class TagServiceTest {
 
     @Test
     void getTagById() {
-        when(tagDao.getById(tag.getId())).thenReturn(tag).thenThrow(ServiceException.class);
+        when(tagDao.isTagExistById(anyLong())).thenReturn(true).thenReturn(false);
+        when(tagDao.getById(tag.getId())).thenReturn(tag);
         assertAll(
-                () -> assertEquals(tag, tagDao.getById(tag.getId())),
+                () -> assertEquals(tag, tagService.getTag(tag.getId())),
                 () -> assertThrows(ServiceException.class, () -> tagService.getTag(tag.getId())));
     }
 

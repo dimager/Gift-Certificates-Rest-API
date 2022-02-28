@@ -3006,7 +3006,7 @@ INSERT INTO certificate_tags (`certificate_id`,`tag_id`) VALUES (999,999);
 INSERT INTO certificate_tags (`certificate_id`,`tag_id`) VALUES (1000,1000);
 
 
-INSERT INTO users (`user_id`,`username`) VALUES (1,'bgent0');
+INSERT INTO users (`user_id`,`username`) VALUES (1,'bgent7');
 INSERT INTO users (`user_id`,`username`) VALUES (2,'mpryor1');
 INSERT INTO users (`user_id`,`username`) VALUES (3,'lmathieu2');
 INSERT INTO users (`user_id`,`username`) VALUES (4,'jjoynt3');

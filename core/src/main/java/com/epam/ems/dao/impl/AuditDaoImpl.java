@@ -9,7 +9,7 @@ import javax.persistence.EntityManager;
 
 @Repository
 public class AuditDaoImpl implements AuditDao {
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Autowired
     public AuditDaoImpl(EntityManager entityManager) {

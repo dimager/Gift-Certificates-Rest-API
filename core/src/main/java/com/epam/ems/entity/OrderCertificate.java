@@ -43,7 +43,7 @@ public class OrderCertificate extends BaseEntity implements Serializable {
     @Getter
     @Setter
     @Column(nullable = false, precision = 10, scale = 2)
-        private BigDecimal price;
+    private BigDecimal price;
 
     public OrderCertificate() {
     }

@@ -12,12 +12,16 @@ import org.springframework.stereotype.Service;
 @Service
 public interface TagService {
 
+
+
     /**
      * Allows getting list of all {@link Tag tags} from DB.
-     *
-     * @return List of {@link Tag tags}.
+     * @param size page size
+     * @param offset offset
+     * @param webMvcLinkBuilder controller link builder
+     * @return  List of {@link Tag tags}.
      */
-    CollectionModel<Tag> getAllTags(int limit, int offset, WebMvcLinkBuilder webMvcLinkBuilder);
+    CollectionModel<Tag> getAllTags(int size, int offset, WebMvcLinkBuilder webMvcLinkBuilder);
 
 
     Tag getMostPopularTag();

@@ -30,12 +30,12 @@ import java.util.Optional;
 public class OrderServiceImpl implements OrderService {
     private static final String MSG_ORDER_WAS_NOT_FOUND = "30602;Order was not found. Order id=";
     private static final String MSG_ORDER_WAS_NOT_CREATED = "30605;Order was not created. Order id=";
-    private static final String MSG_ORDER_WERE_NOT_FOUND = "30603;Orders were not found.";
+    private static final String MSG_ORDER_WERE_NOT_FOUND = "30603;Orders were not found. Wrong user";
 
-    private OrderDao orderDao;
-    private UserService userService;
-    private CertificateService certificateService;
-    private PageService pageService;
+    private final OrderDao orderDao;
+    private final UserService userService;
+    private final CertificateService certificateService;
+    private final PageService pageService;
 
     @Autowired
     public OrderServiceImpl(OrderDao orderDao, UserService userService, CertificateService certificateService, PageService pageService) {
@@ -65,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
                 orders = orderDao.getAllOrders(size, offset);
             }
             PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
-            List<Link> links = pageService.createLinks(size, page, totalSize, link, extraParams);
+            List<Link> links = pageService.createLinksWithNumberParameters(size, page, totalSize, link, extraParams);
             return PagedModel.of(orders, metadata, links);
         } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WERE_NOT_FOUND, e);

@@ -20,10 +20,11 @@ public interface BaseDao<T extends BaseEntity> {
 
     /**
      * Allows getting list of all {@link T} from DB.
-     *
+     * @param offset offset
+     * @param size page size
      * @return List of {@link T}.
      */
-    List<T> getAll(int limit, int offset);
+    List<T> getAll(int size, int offset);
 
     /**
      * Allows getting {@link T} by id.

@@ -68,7 +68,7 @@ public class CertificateServiceImpl implements CertificateService {
                     tags.add(tagService.getTag(s));
                 }
                 extraParams.put("tags", String.join(",", tagsNames.get()));
-                totalSize = certificateDao.getNumberOCertificatesContainsTags(size, offset, tags);
+                totalSize = certificateDao.getNumberOCertificatesContainsTags(tags);
                 certificates = certificateDao.getCertificatesContainsTags(size, offset, tags);
             }
 
@@ -159,10 +159,6 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
-    @Override
-    public boolean isCertificateExist(long id) {
-        return certificateDao.isCertificateExistById(id);
-    }
 
     private void checkInputTagsForExistenceInDatabase(Certificate certificate) {
         List<Tag> tags = new ArrayList<>(certificate.getTags());

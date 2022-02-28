@@ -17,7 +17,7 @@ public class OrderDaoImpl implements OrderDao {
     private static final String FIND_ALL_ORDERS = "select o from Order o";
     private static final String COUNT_USER_ORDERS = "select count(o) from Order o where o.user.id = :id";
     private static final String COUNT_ALL_ORDERS = "select count(o) from Order o";
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Autowired
     public OrderDaoImpl(EntityManager entityManager) {
@@ -27,7 +27,7 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Order getOrder(long id) {
         TypedQuery<Order> typedQuery = entityManager.createQuery(FIND_BY_ID_EQUALS, Order.class);
-                typedQuery.setParameter("id", id);
+        typedQuery.setParameter("id", id);
         return typedQuery.getSingleResult();
     }
 
@@ -42,7 +42,7 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public List<Order> getUserOrders(int size, int offset, long userId) {
         TypedQuery<Order> typedQuery = entityManager.createQuery(FIND_BY_USER_ID_EQUALS, Order.class);
-                typedQuery.setParameter("id", userId);
+        typedQuery.setParameter("id", userId);
         return typedQuery.setFirstResult(offset).setMaxResults(size).getResultList();
     }
 
@@ -55,14 +55,14 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Long getNumberOfUserOrders(long userId) {
         TypedQuery<Long> typedQuery = entityManager.createQuery(COUNT_USER_ORDERS, Long.class);
-                typedQuery.setParameter("id", userId);
+        typedQuery.setParameter("id", userId);
         return typedQuery.getSingleResult();
     }
 
     @Override
     public boolean isOrderExist(long id) {
         TypedQuery<Boolean> query = entityManager.createQuery(EXISTS_BY_ID_EQUALS, Boolean.class);
-                query.setParameter("id", id);
+        query.setParameter("id", id);
         return query.getSingleResult();
     }
 

@@ -33,6 +33,13 @@ public class TagController {
         this.tagService = tagService;
     }
 
+    /**
+     * Allows getting all tags
+     *
+     * @param size number of tags per page
+     * @param page number of page
+     * @return list of tags
+     */
     @GetMapping
     public CollectionModel<Tag> getAllTags(@RequestParam(name = "size", defaultValue = "10") int size,
                                            @RequestParam(name = "page", defaultValue = "1") int page) {
@@ -51,6 +58,12 @@ public class TagController {
                 .withRel("Certificates"));
     }
 
+    /**
+     * Allows getting tag info
+     *
+     * @param id tag id
+     * @return tag
+     */
     @GetMapping("{id}")
     public Tag getTag(@PathVariable long id) {
         Tag tag = tagService.getTag(id);
@@ -58,6 +71,12 @@ public class TagController {
         return tag;
     }
 
+    /**
+     * Allows creating tag
+     *
+     * @param tag tag data
+     * @return created tag with id
+     */
     @PostMapping(consumes = {"application/json"})
     public Tag addTag(@RequestBody @Valid Tag tag) {
         tag = tagService.createTag(tag);
@@ -65,6 +84,13 @@ public class TagController {
         return tag;
     }
 
+    /**
+     * Allows updating tag
+     *
+     * @param id  tag id
+     * @param tag tag data
+     * @return updated tag
+     */
     @PutMapping("{id}")
     public Tag updateTag(@PathVariable long id, @RequestBody @Valid Tag tag) {
         tag.setId(id);
@@ -73,6 +99,11 @@ public class TagController {
         return tag;
     }
 
+    /**
+     * Allows getting most popular tag
+     *
+     * @return tag
+     */
     @GetMapping("mostpopular")
     public Tag mostPopuparTag() {
         Tag tag = tagService.getMostPopularTag();
@@ -80,6 +111,12 @@ public class TagController {
         return tag;
     }
 
+    /**
+     * Allows deleting tag by id
+     *
+     * @param id tag id
+     * @return true
+     */
 
     @DeleteMapping("{id}")
     public ResponseEntity<Tag> deleteTag(@PathVariable long id) {

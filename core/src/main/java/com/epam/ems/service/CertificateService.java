@@ -19,7 +19,9 @@ public interface CertificateService {
      * @param sort    type of sorting.
      * @param tags    Names of tags which should be included in certificate
      * @param pattern pattern used for filtering by name or description
-     * @param link
+     * @param link link to controller
+     * @param page number of page
+     * @param size page size
      * @return List of {@link Certificate certificates};
      */
     CollectionModel<Certificate> getFilteredSortedCertificates(Optional<String> sort,
@@ -62,7 +64,13 @@ public interface CertificateService {
     Certificate createCertificate(Certificate certificate);
 
 
+    /**
+     * Allows update certificate duration
+     *
+     * @param id certificate id
+     * @param durationOnly certificate data
+     * @return true if certificate was updated
+     */
     boolean updateDuration(long id, Certificate durationOnly);
 
-    boolean isCertificateExist(long id);
 }

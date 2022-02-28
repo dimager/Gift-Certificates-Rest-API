@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -21,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = TestDaoConfig.class)
-@Transactional
+@SpringBootTest(classes = {TestDaoConfig.class})
 class CertificateDaoImplTest {
 
     @Autowired
@@ -64,6 +62,7 @@ class CertificateDaoImplTest {
     }
 
     @Test
+    @Transactional
     void update() {
         long id = 161;
         String newName = "updatedName";
@@ -83,6 +82,7 @@ class CertificateDaoImplTest {
     }
 
     @Test
+    @Transactional
     void create() {
         Certificate newCertificate = new Certificate();
         newCertificate.setName("testCertificate");
@@ -97,6 +97,7 @@ class CertificateDaoImplTest {
     }
 
     @Test
+    @Transactional
     void delete() {
         long testCertificateId = 123;
         assertAll(

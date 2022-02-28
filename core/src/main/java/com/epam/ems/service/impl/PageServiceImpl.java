@@ -18,7 +18,7 @@ public class PageServiceImpl implements PageService {
     private static final String MSG_PAGE_NOT_FOUND = "30607;Page not found. Page=";
 
     @Override
-    public List<Link> createLinks(int size, int page, long totalSize, WebMvcLinkBuilder link, HashMap<String, Number> extraParams) {
+    public List<Link> createLinksWithNumberParameters(int size, int page, long totalSize, WebMvcLinkBuilder link, HashMap<String, Number> extraParams) {
         HashMap<String, UriComponentsBuilder> uriMap = this.createUriMap(size, page, totalSize, link);
         if (!extraParams.isEmpty()) {
             extraParams.forEach((s, number) -> uriMap.forEach((s1, uriComponentsBuilder) -> uriComponentsBuilder.queryParam(s, number)));

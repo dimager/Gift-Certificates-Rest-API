@@ -47,14 +47,12 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> getAll(int limit, int offset) {
-        return entityManager.createQuery(FIND_ALL, Tag.class).setMaxResults(limit).setFirstResult(offset).getResultList();
+    public List<Tag> getAll(int size, int offset) {
+        return entityManager.createQuery(FIND_ALL, Tag.class).setMaxResults(size).setFirstResult(offset).getResultList();
     }
 
     @Override
     public Tag getById(long id) {
-        logger.error(entityManager.getEntityManagerFactory().getMetamodel().getEntities());
-        logger.error(entityManager.getEntityGraphs(Tag.class));
         TypedQuery<Tag> typedQuery = entityManager.createQuery(FIND_BY_ID_EQUALS, Tag.class);
         typedQuery.setParameter("id", id);
         return typedQuery.getSingleResult();

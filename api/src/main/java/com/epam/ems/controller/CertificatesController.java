@@ -36,6 +36,16 @@ public class CertificatesController {
         this.certificateService = certificateService;
     }
 
+    /**
+     * Allows getting list of certificates with extra parameters.
+     *
+     * @param sort    - type og sort (name, name_desc, date, date_desc, name_date, name_date_desc, name_desc_date, name_desc_date_desc)
+     * @param tags    - get certificates with tags
+     * @param pattern - filter certificates by pattern in name or description
+     * @param size    - page size
+     * @param page    - number of page
+     * @return Certificates with links and page navigation.
+     */
     @GetMapping
     public CollectionModel<Certificate> getCertificates(@RequestParam(name = "sort") Optional<String> sort,
                                                         @RequestParam(name = "tags") Optional<String[]> tags,
@@ -65,6 +75,12 @@ public class CertificatesController {
         }
     }
 
+    /**
+     * Allows getting certificate  by id.
+     *
+     * @param id - certificate id
+     * @return certificate
+     */
     @GetMapping("{id}")
     public Certificate getCertificate(@PathVariable long id) {
         Certificate certificate = certificateService.getCertificate(id);
@@ -72,6 +88,12 @@ public class CertificatesController {
         return certificate;
     }
 
+    /**
+     * Allows deleting certificate by id.
+     *
+     * @param id certificate id
+     * @return true or false
+     */
     @DeleteMapping("{id}")
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable long id) {
         if (certificateService.deleteCertificate(id)) {
@@ -81,6 +103,13 @@ public class CertificatesController {
         }
     }
 
+
+    /**
+     * Allows adding certificate.
+     *
+     * @param certificate certificate data
+     * @return created certificate with id
+     */
     @PostMapping
     public Certificate addCertificate(@RequestBody @Valid Certificate certificate) {
         certificate = certificateService.createCertificate(certificate);
@@ -88,6 +117,13 @@ public class CertificatesController {
         return certificate;
     }
 
+    /**
+     * Allows updating certificate
+     *
+     * @param id          certificateid
+     * @param certificate certificate parameters
+     * @return updated certificate
+     */
     @PutMapping("{id}")
     public Certificate updateCertificate(@PathVariable long id, @RequestBody @Valid Certificate certificate) {
         certificate.setId(id);
@@ -96,6 +132,13 @@ public class CertificatesController {
         return certificate;
     }
 
+    /**
+     * Allows updating certificate`s duration
+     *
+     * @param id          certificateid
+     * @param certificate certificate parameters
+     * @return updated certificate
+     */
     @PatchMapping(path = "{id}")
     public Certificate updateCertificateDuration(@PathVariable long id, @RequestBody Certificate certificate) {
         certificateService.updateDuration(id, certificate);
