@@ -6,12 +6,13 @@ import java.util.List;
 
 /**
  * @param <T> class that must extend BaseDao.
- * Interface {@link BaseDao} helps to implement CRUD methods to {@link T}.
+ *            Interface {@link BaseDao} helps to implement CRUD methods to {@link T}.
  */
 public interface BaseDao<T extends BaseEntity> {
 
     /**
      * Allows deleting {@link T} entity from DB by id.
+     *
      * @param id {@link T} id.
      * @return true - if object is deleted, otherwise - false.
      */
@@ -19,12 +20,15 @@ public interface BaseDao<T extends BaseEntity> {
 
     /**
      * Allows getting list of all {@link T} from DB.
+     * @param offset offset
+     * @param size page size
      * @return List of {@link T}.
      */
-    List<T> getAll();
+    List<T> getAll(int size, int offset);
 
     /**
      * Allows getting {@link T} by id.
+     *
      * @param id {@link T} id
      * @return {@link T} object by id
      */
@@ -32,6 +36,7 @@ public interface BaseDao<T extends BaseEntity> {
 
     /**
      * Allows updating {@link T} entity in DB.
+     *
      * @param t {@link T} new data.
      * @return updated object.
      */
@@ -39,6 +44,7 @@ public interface BaseDao<T extends BaseEntity> {
 
     /**
      * Allows creating {@link T} entity in DB.
+     *
      * @param t {@link T} new data.
      * @return created {@link T} with generated ID.
      */

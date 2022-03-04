@@ -2,62 +2,81 @@ package com.epam.ems.dao;
 
 import com.epam.ems.TestDaoConfig;
 import com.epam.ems.entity.Tag;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestDaoConfig.class, loader = AnnotationConfigContextLoader.class)
+@SpringBootTest(classes = {TestDaoConfig.class})
 class TagDaoImplTest {
-
     @Autowired
     private TagDao tagDao;
 
     @Test
+    @Transactional
     void delete() {
-        Tag tag = tagDao.getById(10);
-        Assertions.assertAll(
-                () -> Assertions.assertTrue(tagDao.delete(tag.getId())),
-                () -> Assertions.assertFalse(tagDao.getAll().contains(tag)),
-                () -> Assertions.assertFalse(tagDao.delete(-1))
-        );
+        long tagId = 100;
+        assertAll(() -> assertDoesNotThrow(() -> tagDao.getById(tagId)),
+                () -> assertTrue(tagDao.delete(tagId)),
+                () -> assertThrows(EmptyResultDataAccessException.class, () -> tagDao.getById(tagId)));
     }
 
     @Test
     void getAll() {
-        Assertions.assertFalse(tagDao.getAll().isEmpty());
+        int pageSize = 13;
+        assertAll(() -> assertEquals(pageSize, tagDao.getAll(pageSize, 0).size()));
     }
 
     @Test
     void getById() {
-        Assertions.assertAll(
-                () -> Assertions.assertInstanceOf(Tag.class, tagDao.getById(13)),
-                () -> Assertions.assertThrows(DataAccessException.class, () -> tagDao.getById(-1)));
+        assertAll(() -> assertDoesNotThrow(() -> tagDao.getById(1)),
+                () -> assertThrows(EmptyResultDataAccessException.class, () -> tagDao.getById(10000)));
     }
 
     @Test
+    @Transactional
     void create() {
         Tag tag = new Tag("testTag");
-        Assertions.assertAll(
-                () -> Assertions.assertInstanceOf(Tag.class, tagDao.create(tag)),
-                () -> Assertions.assertEquals(tagDao.getById(tag.getId()), tag)
+        assertAll(
+                () -> assertInstanceOf(Tag.class, tagDao.create(tag)),
+                () -> assertEquals(tagDao.getById(tag.getId()), tag)
         );
+    }
+
+    @Test
+    @Transactional
+    void update() {
+        Tag tag = tagDao.getById(200);
+        tag.setName("newName");
+        assertAll(() -> assertDoesNotThrow(() -> tagDao.update(tag)),
+                () -> assertEquals(tag.getName(), tagDao.getById(200).getName()));
     }
 
     @Test
     void getByName() {
-        String tagName = "spa";
-        String incorrectName = "spda";
-        Assertions.assertAll(
-                () -> Assertions.assertEquals(tagDao.getByName(tagName).getName(), tagName),
-                () -> Assertions.assertThrows(DataAccessException.class, () -> tagDao.getByName(incorrectName))
+        String tagName = "video1";
+        assertAll(
+                () -> assertEquals(tagDao.getByName(tagName).getName(), tagName)
         );
     }
 
+    @Test
+    void isTagExistByName() {
+        String name = "video1";
+        String missingTagName = "missingTag";
+
+        assertAll(() -> assertTrue(tagDao.isTagExistByName(name)),
+                () -> assertFalse(tagDao.isTagExistByName(missingTagName)));
+    }
 }

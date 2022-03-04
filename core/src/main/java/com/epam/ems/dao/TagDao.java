@@ -3,6 +3,21 @@ package com.epam.ems.dao;
 import com.epam.ems.entity.Tag;
 
 public interface TagDao extends BaseDao<Tag> {
+
+    /**
+     * Allows getting number of all tags.
+     *
+     * @return number of all tags
+     */
+    Long getNumberOfTags();
+
+    /**
+     * Allows getting most popular tag
+     *
+     * @return most popular tag info
+     */
+    Tag getMostPopularTag();
+
     /**
      * Allows getting tag by name.
      *

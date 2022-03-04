@@ -1,13 +1,14 @@
-package com.epam.ems.response;
+package com.epam.ems.exception.response;
 
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+
 public class ValidationExceptionResponse {
     private HttpStatus httpStatus;
     private String errorCode;
-    private Map<String,String> errors = new HashMap();
+    private Map<String, String> errors = new HashMap();
 
     public HttpStatus getHttpStatus() {
         return httpStatus;

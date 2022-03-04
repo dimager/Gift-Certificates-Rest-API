@@ -1,150 +1,183 @@
 package com.epam.ems.dao.impl;
 
 import com.epam.ems.dao.CertificateDao;
-import com.epam.ems.dao.rowmapper.CertificateRowMapper;
-import com.epam.ems.dao.rowmapper.CertificateTagRowMapper;
-import com.epam.ems.dao.rowmapper.TagRowMapper;
 import com.epam.ems.entity.Certificate;
-import com.epam.ems.entity.CertificateTag;
 import com.epam.ems.entity.Tag;
+import com.epam.ems.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 
 @Repository
-public class CertificateDaoImpl extends NamedParameterJdbcTemplate implements CertificateDao {
+public class CertificateDaoImpl implements CertificateDao {
+    private final static String SORT_NAME = "name";
+    private final static String SORT_NAME_DESC = "name_desc";
+    private final static String SORT_DATE = "date";
+    private final static String SORT_DATE_DESC = "date_desc";
+    private final static String SORT_NAME_ASC_DATE_ASC = "name_date";
+    private final static String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
+    private final static String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
+    private final static String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
+    private static final String MSG_SORT_TYPE_NOT_FOUND = "30406;Sort type was not found";
+    private final static String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
+    private final static String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
+    private final static String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
+    private final static String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
+    private final static String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
+            ":tags and c.isArchived = false group by c.id having count(c.id) = :amount";
 
-    private static final int ONE_UPDATED_ROW = 1;
-    private static final int NO_DB_ENTRY = 0;
-    private static final String SQL_SELECT_BY_ID = "SELECT id, name, description, price, duration, create_date, last_update_date " +
-            "FROM gift_certificate WHERE id=:id";
-    private static final String SQL_SELECT_ALL = "SELECT id, name, description, price, duration, create_date, last_update_date " +
-            "FROM gift_certificate";
-    private static final String SQL_INSERT = "INSERT INTO gift_certificate (name,description,price,duration,create_date,last_update_date) " +
-            "VALUES (:name, :description, :price, :duration, :createDateTime, :lastUpdateDateTime)";
-    private static final String SQL_UPDATE = "UPDATE gift_certificate " +
-            "SET name = :name, description = :description, price = :price, duration = :duration, last_update_date = :lastUpdateDate " +
-            "WHERE id = :id;";
-    private static final String SQL_DELETE = "DELETE FROM gift_certificate WHERE id = :id";
-    private static final String SQL_ADD_TAG_TO_CERTIFICATE = "INSERT INTO gift_certificate_has_tag (gift_certificate_id,tag_id) " +
-            "VALUES (:certificateId, :tagId)";
-    private static final String SQL_DELETE_TAG_FROM_CERTIFICATE = "DELETE FROM gift_certificate_has_tag " +
-            "WHERE gift_certificate_id = :certificateId AND tag_id = :tagId";
-    private static final String SQL_CERTIFICATE_HAS_TAG = "SELECT count(*) FROM gift_certificate_has_tag " +
-            "WHERE gift_certificate_id = :certificateId AND tag_id = :tagId";
-    private static final String SQL_SELECT_TAGS_FOR_CERTIFICATE_BY_ID = "SELECT id, name FROM tag " +
-            "LEFT JOIN gift_certificate_has_tag as gsht on tag.id = gsht.tag_id " +
-            "WHERE gsht.gift_certificate_id = :id";
-    private static final String SQL_SELECT_IS_CERTIFICATE_EXIST = "SELECT COUNT(*) FROM gift_certificate WHERE id = :id";
-    private static final String SQL_SELECT_ALL_CERTIFICATES_ID_WITH_TAGS = "select gchs.gift_certificate_id, t.id, t.name " +
-            "from gift_certificate_has_tag as gchs left join tag as t on gchs.tag_id = t.id order by gchs.gift_certificate_id";
+
+    private final EntityManager entityManager;
+
 
     @Autowired
-    public CertificateDaoImpl(DataSource dataSource) {
-        super(dataSource);
+    public CertificateDaoImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
+
     @Override
-    public List<Certificate> getAll() {
-        List<Certificate> certificates = this.query(SQL_SELECT_ALL, new CertificateRowMapper());
-        List<CertificateTag> certificateTagList = this.query(SQL_SELECT_ALL_CERTIFICATES_ID_WITH_TAGS, new CertificateTagRowMapper());
-        for (Certificate certificate : certificates) {
-            certificate.getTags()
-                    .addAll(certificateTagList.stream()
-                            .filter(certificateTag -> certificateTag.getCertId()==certificate.getId())
-                            .map(CertificateTag::getTag)
-                            .collect(Collectors.toList()));
-        }
-        return certificates;
+    public boolean delete(long id) {
+        Query query = entityManager.createQuery(UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE);
+        query.setParameter("id", id);
+        return query.executeUpdate() == 1;
+    }
+
+
+    @Override
+    public List<Certificate> getAll(int size, int offset) {
+        return entityManager.createQuery(FIND_ALL_CERTIFICATES, Certificate.class)
+                .setFirstResult(offset)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     @Override
     public Certificate getById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
-        Certificate certificate = this.queryForObject(SQL_SELECT_BY_ID, sqlParameterSource, new CertificateRowMapper());
-        certificate.getTags().addAll(this.getCertificateTags(id));
-        return certificate;
+        TypedQuery<Certificate> query = entityManager.createQuery(FIND_BY_ID, Certificate.class);
+        query.setParameter("id", id);
+        return query.getSingleResult();
     }
 
     @Override
     public Certificate update(Certificate certificate) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", certificate.getId());
-        sqlParameterSource.addValue("name", certificate.getName());
-        sqlParameterSource.addValue("description", certificate.getDescription());
-        sqlParameterSource.addValue("price", certificate.getPrice());
-        sqlParameterSource.addValue("duration", certificate.getDuration());
-        sqlParameterSource.addValue("lastUpdateDate", certificate.getLastUpdatedDateTime());
-        this.update(SQL_UPDATE, sqlParameterSource);
-        return getById(certificate.getId());
+        entityManager.merge(certificate);
+        entityManager.flush();
+        return entityManager.find(Certificate.class, certificate.getId());
     }
 
-
     @Override
+    @Transactional
     public Certificate create(Certificate certificate) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("name", certificate.getName());
-        sqlParameterSource.addValue("description", certificate.getDescription());
-        sqlParameterSource.addValue("price", certificate.getPrice());
-        sqlParameterSource.addValue("duration", certificate.getDuration());
-        sqlParameterSource.addValue("createDateTime", certificate.getCreatedDateTime());
-        sqlParameterSource.addValue("lastUpdateDateTime", certificate.getLastUpdatedDateTime());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        this.update(SQL_INSERT, sqlParameterSource, keyHolder);
-        certificate.setId(keyHolder.getKey().longValue());
-        return certificate;
-    }
-
-    @Override
-    public boolean delete(long id) {
-            MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-            sqlParameterSource.addValue("id", id);
-            return this.update(SQL_DELETE, sqlParameterSource) == ONE_UPDATED_ROW;
-    }
-
-    @Override
-    public List<Tag> getCertificateTags(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
-        return this.query(SQL_SELECT_TAGS_FOR_CERTIFICATE_BY_ID, sqlParameterSource, new TagRowMapper());
-    }
-
-    @Override
-    public boolean addTagToCertificate(Tag tag, Certificate certificate) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("certificateId", certificate.getId());
-        sqlParameterSource.addValue("tagId", tag.getId());
-        return this.update(SQL_ADD_TAG_TO_CERTIFICATE, sqlParameterSource) == ONE_UPDATED_ROW;
-    }
-
-    @Override
-    public boolean removeTagFromCertificate(Tag tag, Certificate certificate) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("certificateId", certificate.getId());
-        sqlParameterSource.addValue("tagId", tag.getId());
-        return this.update(SQL_DELETE_TAG_FROM_CERTIFICATE, sqlParameterSource) == ONE_UPDATED_ROW;
-    }
-
-    @Override
-    public boolean isCertificateMissingTag(Tag tag, Certificate certificate) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("certificateId", certificate.getId());
-        sqlParameterSource.addValue("tagId", tag.getId());
-        return this.queryForObject(SQL_CERTIFICATE_HAS_TAG, sqlParameterSource, Integer.class) == NO_DB_ENTRY;
+        entityManager.persist(certificate);
+        entityManager.flush();
+        return entityManager.find(Certificate.class, certificate.getId());
     }
 
     @Override
     public boolean isCertificateExistById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
-        return this.queryForObject(SQL_SELECT_IS_CERTIFICATE_EXIST, sqlParameterSource, Integer.class) == ONE_UPDATED_ROW;
+        TypedQuery<Boolean> query = entityManager.createQuery(EXISTS_BY_ID, Boolean.class);
+        query.setParameter("id", id);
+        return query.getSingleResult();
+    }
+
+    @Override
+    public List<Certificate> getCertificatesContainsTags(int size, int offset, Set<Tag> tags) {
+        TypedQuery<Certificate> typedQuery = entityManager.createQuery(FIND_CERTIFICATES_BY_TAG_IN, Certificate.class);
+        typedQuery.setParameter("tags", tags);
+        typedQuery.setParameter("amount", (long) tags.size());
+        return typedQuery.setMaxResults(size)
+                .setFirstResult(offset)
+                .getResultList();
+    }
+
+    @Override
+    public Integer getNumberOCertificatesContainsTags(Set<Tag> tags) {
+        TypedQuery<Certificate> typedQuery = entityManager.createQuery(FIND_CERTIFICATES_BY_TAG_IN, Certificate.class);
+        typedQuery.setParameter("tags", tags);
+        typedQuery.setParameter("amount", (long) tags.size());
+        return typedQuery.getResultList().size();
+    }
+
+    @Override
+    public List<Certificate> getCertificates(int size, int offset, Optional<String> sort,
+                                             Optional<String> filterPattern) {
+
+        TypedQuery<Certificate> tq = getCertificatesTypedQuery(sort, filterPattern);
+        return tq.setMaxResults(size).setFirstResult(offset).getResultList();
+    }
+
+
+    @Override
+    public Integer getCertificatesAmount(Optional<String> sort,
+                                         Optional<String> filterPattern) {
+
+        TypedQuery<Certificate> tq = getCertificatesTypedQuery(sort, filterPattern);
+        return tq.getResultList().size();
+    }
+
+    private TypedQuery<Certificate> getCertificatesTypedQuery(Optional<String> sort, Optional<String> filterPattern) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Certificate> criteriaQuery = builder.createQuery(Certificate.class);
+        Root<Certificate> root = criteriaQuery.from(Certificate.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(builder.isFalse(root.get("isArchived")));
+
+        if (sort.isPresent()) {
+            switch (sort.get().toLowerCase(Locale.ROOT)) {
+                case SORT_NAME:
+                    criteriaQuery.orderBy(builder.asc(root.get("name")));
+                    break;
+                case SORT_NAME_DESC:
+                    criteriaQuery.orderBy(builder.desc(root.get("name")));
+                    break;
+                case SORT_DATE:
+                    criteriaQuery.orderBy(builder.asc(root.get("createdDateTime")));
+                    break;
+                case SORT_DATE_DESC:
+                    criteriaQuery.orderBy(builder.desc(root.get("createdDateTime")));
+                    break;
+                case SORT_NAME_ASC_DATE_ASC:
+                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.asc(root.get("createdDateTime")));
+                    break;
+                case SORT_NAME_ASC_DATE_DESC:
+                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.desc(root.get("createdDateTime")));
+                    break;
+                case SORT_NAME_DESC_DATE_ASC:
+                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.asc(root.get("createdDateTime")));
+                    break;
+                case SORT_NAME_DESC_DATE_DESC:
+                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.desc(root.get("createdDateTime")));
+                    break;
+                default:
+                    throw new ServiceException(HttpStatus.NOT_FOUND, MSG_SORT_TYPE_NOT_FOUND);
+            }
+        }
+
+        TypedQuery<Certificate> tq = entityManager.createQuery(criteriaQuery);
+
+        if (filterPattern.isPresent()) {
+            criteriaQuery.where(
+                    builder.and(builder.isFalse(root.get("isArchived")),
+                            builder.or(builder.like(root.get("name"), builder.parameter(String.class, "pattern")),
+                                    builder.like(root.get("description"), builder.parameter(String.class, "pattern")))));
+            StringBuilder pattern = new StringBuilder();
+            pattern.append("%").append(filterPattern.get()).append("%");
+            tq = entityManager.createQuery(criteriaQuery);
+            tq.setParameter("pattern", pattern.toString());
+        }
+        return tq;
     }
 }

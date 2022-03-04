@@ -1,11 +1,10 @@
 package com.epam.ems.service;
 
 import com.epam.ems.entity.Certificate;
-import com.epam.ems.entity.Tag;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,16 +15,25 @@ public interface CertificateService {
 
     /**
      * Allows getting list of all {@link Certificate certificates}, could be sorted, filtered by name, description, tag name;
-     * @param sort type of sorting.
-     * @param tagName Name of tag which should be included in certificate
+     *
+     * @param sort    type of sorting.
+     * @param tags    Names of tags which should be included in certificate
      * @param pattern pattern used for filtering by name or description
+     * @param link link to controller
+     * @param page number of page
+     * @param size page size
      * @return List of {@link Certificate certificates};
      */
-    List<Certificate> getFilteredSortedCertificates(Optional<String> sort,
-                                                    Optional<String> tagName, Optional<String> pattern);
+    CollectionModel<Certificate> getFilteredSortedCertificates(Optional<String> sort,
+                                                               Optional<String[]> tags,
+                                                               Optional<String> pattern,
+                                                               int page,
+                                                               int size,
+                                                               WebMvcLinkBuilder link);
 
     /**
      * Allows getting {@link Certificate} entity from DB by id.
+     *
      * @param id {@link Certificate} id
      * @return {@link Certificate}
      */
@@ -33,6 +41,7 @@ public interface CertificateService {
 
     /**
      * Allows deleting {@link Certificate} by from DB id.
+     *
      * @param id {@link Certificate} id
      * @return true - if object is deleted, otherwise - false.
      */
@@ -40,6 +49,7 @@ public interface CertificateService {
 
     /**
      * Allows updating {@link Certificate} entity in DB.
+     *
      * @param certificate {@link Certificate} with new data.
      * @return updated {@link Certificate}.
      */
@@ -47,16 +57,20 @@ public interface CertificateService {
 
     /**
      * Allows creating {@link Certificate} entity in DB.
+     *
      * @param certificate new {@link Certificate}
      * @return tag with generated {@link Certificate} id.
      */
     Certificate createCertificate(Certificate certificate);
 
+
     /**
-     * Allows  getting certificate`s tags by {@link Certificate} id
-     * @param id {@link Certificate} id
-     * @return List of certificate`s tags
+     * Allows update certificate duration
+     *
+     * @param id certificate id
+     * @param durationOnly certificate data
+     * @return true if certificate was updated
      */
-    List<Tag> getCertificateTags(long id);
+    boolean updateDuration(long id, Certificate durationOnly);
 
 }

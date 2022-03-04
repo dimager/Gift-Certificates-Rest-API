@@ -1,10 +1,11 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.entity.Tag;
-import com.epam.ems.handler.ValidationHandler;
 import com.epam.ems.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,50 +14,116 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @Validated
 @RequestMapping("/tags")
 public class TagController {
     private final TagService tagService;
-    private final ValidationHandler validationHandler;
 
     @Autowired
-    public TagController(TagService tagService, ValidationHandler validationHandler) {
+    public TagController(TagService tagService) {
         this.tagService = tagService;
-        this.validationHandler = validationHandler;
     }
 
+    /**
+     * Allows getting all tags
+     *
+     * @param size number of tags per page
+     * @param page number of page
+     * @return list of tags
+     */
     @GetMapping
-    public List<Tag> getAllTags() {
-        return tagService.getAllTags();
+    public CollectionModel<Tag> getAllTags(@RequestParam(name = "size", defaultValue = "10") int size,
+                                           @RequestParam(name = "page", defaultValue = "1") int page) {
+        CollectionModel<Tag> tags = tagService.getAllTags(size, page, linkTo(TagController.class));
+        for (Tag tag : tags.getContent()) {
+            System.out.println(tag);
+            this.createLinks(tag);
+        }
+        return tags;
     }
 
+    private void createLinks(Tag tag) {
+        tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+        tag.add(Link.of(linkTo(CertificatesController.class)
+                        .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
+                .withRel("Certificates"));
+    }
+
+    /**
+     * Allows getting tag info
+     *
+     * @param id tag id
+     * @return tag
+     */
     @GetMapping("{id}")
     public Tag getTag(@PathVariable long id) {
-        return tagService.getTag(id);
+        Tag tag = tagService.getTag(id);
+        this.createLinks(tag);
+        return tag;
     }
 
-
+    /**
+     * Allows creating tag
+     *
+     * @param tag tag data
+     * @return created tag with id
+     */
     @PostMapping(consumes = {"application/json"})
-    public Tag addTag(@RequestBody @Valid Tag tag, BindingResult bindingResult) {
-        validationHandler.handleBindingResult(bindingResult);
-        return tagService.createTag(tag);
+    public Tag addTag(@RequestBody @Valid Tag tag) {
+        tag = tagService.createTag(tag);
+        createLinks(tag);
+        return tag;
     }
 
+    /**
+     * Allows updating tag
+     *
+     * @param id  tag id
+     * @param tag tag data
+     * @return updated tag
+     */
     @PutMapping("{id}")
-    public Tag updateTag(@PathVariable long id, @RequestBody @Valid Tag tag, BindingResult bindingResult) {
-        validationHandler.handleBindingResult(bindingResult);
+    public Tag updateTag(@PathVariable long id, @RequestBody @Valid Tag tag) {
         tag.setId(id);
-        return tagService.updateTag(tag);
+        tag = tagService.updateTag(tag);
+        this.createLinks(tag);
+        return tag;
     }
+
+    /**
+     * Allows getting most popular tag
+     *
+     * @return tag
+     */
+    @GetMapping("mostpopular")
+    public Tag mostPopuparTag() {
+        Tag tag = tagService.getMostPopularTag();
+        this.createLinks(tag);
+        return tag;
+    }
+
+    /**
+     * Allows deleting tag by id
+     *
+     * @param id tag id
+     * @return true
+     */
 
     @DeleteMapping("{id}")
-    public boolean deleteTag(@PathVariable long id) {
-        return tagService.deleteTag(id);
+    public ResponseEntity<Tag> deleteTag(@PathVariable long id) {
+        if (tagService.deleteTag(id)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

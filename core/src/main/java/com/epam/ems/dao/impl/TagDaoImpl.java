@@ -1,98 +1,106 @@
 package com.epam.ems.dao.impl;
 
 import com.epam.ems.dao.TagDao;
-import com.epam.ems.dao.rowmapper.TagRowMapper;
 import com.epam.ems.entity.Tag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import java.math.BigInteger;
 import java.util.List;
-
+import java.util.Objects;
 
 @Repository
-public class TagDaoImpl extends NamedParameterJdbcTemplate implements TagDao {
+public class TagDaoImpl implements TagDao {
+    private static final String FIND_BY_ID_EQUALS = "select t from Tag t where t.id = :id";
+    private static final String COUNT_ALL_TAGS = "select count(t) from Tag t";
+    private static final String FIND_ALL = "select t from Tag t";
+    private static final String FIND_BY_NAME_EQUALS = "select t from Tag t where t.name = :name";
+    private static final String EXISTS_BY_NAME_EQUALS = "select (count(t) > 0) from Tag t where t.name = :name";
+    private static final Logger logger = LogManager.getLogger(TagDaoImpl.class);
+    private static final String SQL_SELECT_MOST_POPULAR_TAG =
+            "select t.tag_id, t.name, sum(oc.amount) as totaltags, o.user_id, t1.totalcost from tags as t " +
+                    "join certificate_tags as ct on t.tag_id = ct.tag_id " +
+                    "join order_certificate as oc on ct.certificate_id = oc.certificate_id " +
+                    "join orders as o on oc.order_id = o.order_id " +
+                    "join ( select user_id, sum(cost) as totalcost from orders group by user_id order by sum(cost) desc limit 1 )" +
+                    " as t1 on o.user_id = t1.user_id group by t.tag_id order by totaltags desc limit 1";
 
-    private static final int ONE_UPDATED_ROW = 1;
-    private static final String SQL_SELECT_BY_ID = "SELECT id, name FROM tag where id=:id";
-    private static final String SQL_SELECT_IS_TAG_EXIST_BY_NAME = "SELECT COUNT(*) FROM tag where name like :name";
-    private static final String SQL_SELECT_IS_TAG_EXIST_BY_ID = "SELECT COUNT(*) FROM tag where id = :id";
-    private static final String SQL_SELECT_BY_NAME = "SELECT id, name FROM tag where name like :name";
-    private static final String SQL_SELECT_ALL = "SELECT id, name FROM tag";
-    private static final String SQL_UPDATE = "UPDATE tag SET name = :name WHERE id = :id";
-    private static final String SQL_INSERT = "INSERT INTO tag (name) VALUES (:name)";
-    private static final String SQL_DELETE = "DELETE FROM tag WHERE id = :id";
-
+    private final EntityManager entityManager;
 
     @Autowired
-    public TagDaoImpl(DataSource dataSource) {
-        super(dataSource);
+    public TagDaoImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
-
 
     @Override
     public boolean delete(long id) {
-            MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-            sqlParameterSource.addValue("id", id);
-            return this.update(SQL_DELETE, sqlParameterSource) == ONE_UPDATED_ROW;
+        Tag tag = entityManager.find(Tag.class, id);
+        if (Objects.nonNull(tag)) {
+            entityManager.remove(tag);
+            return true;
+        }
+        return false;
     }
-
 
     @Override
-    public List<Tag> getAll() {
-        return this.query(SQL_SELECT_ALL, new TagRowMapper());
+    public List<Tag> getAll(int size, int offset) {
+        return entityManager.createQuery(FIND_ALL, Tag.class).setMaxResults(size).setFirstResult(offset).getResultList();
     }
-
 
     @Override
     public Tag getById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
-        return this.queryForObject(SQL_SELECT_BY_ID, sqlParameterSource, new TagRowMapper());
+        TypedQuery<Tag> typedQuery = entityManager.createQuery(FIND_BY_ID_EQUALS, Tag.class);
+        typedQuery.setParameter("id", id);
+        return typedQuery.getSingleResult();
+    }
+
+    @Override
+    public Long getNumberOfTags() {
+        return entityManager.createQuery(COUNT_ALL_TAGS, Long.class).getSingleResult();
+    }
+
+    @Override
+    public Tag getMostPopularTag() {
+        Object[] objects = (Object[]) entityManager.createNativeQuery(SQL_SELECT_MOST_POPULAR_TAG).getSingleResult();
+        BigInteger integer = (BigInteger) objects[0];
+        return this.getById(integer.longValue());
     }
 
     @Override
     public Tag update(Tag tag) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("name", tag.getName());
-        sqlParameterSource.addValue("id", tag.getId());
-        this.update(SQL_UPDATE, sqlParameterSource);
-        return this.queryForObject(SQL_SELECT_BY_ID, sqlParameterSource, new TagRowMapper());
+        entityManager.merge(tag);
+        entityManager.flush();
+        return tag;
     }
 
     @Override
     public Tag create(Tag tag) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("name", tag.getName());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        this.update(SQL_INSERT, sqlParameterSource, keyHolder);
-        tag.setId(keyHolder.getKey().longValue());
+        entityManager.persist(tag);
+        entityManager.flush();
         return tag;
     }
 
     @Override
     public Tag getByName(String name) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("name", name);
-        return this.queryForObject(SQL_SELECT_BY_NAME, sqlParameterSource, new TagRowMapper());
+        TypedQuery<Tag> typedQuery = entityManager.createQuery(FIND_BY_NAME_EQUALS, Tag.class);
+        typedQuery.setParameter("name", name);
+        return typedQuery.getSingleResult();
     }
 
     @Override
     public boolean isTagExistById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
-        return this.queryForObject(SQL_SELECT_IS_TAG_EXIST_BY_ID, sqlParameterSource, Integer.class) == ONE_UPDATED_ROW;
+        Tag tag = entityManager.find(Tag.class, id);
+        return Objects.nonNull(tag);
     }
 
     @Override
     public boolean isTagExistByName(String name) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("name", name);
-        return this.queryForObject(SQL_SELECT_IS_TAG_EXIST_BY_NAME, sqlParameterSource, Integer.class) == ONE_UPDATED_ROW;
+        TypedQuery<Boolean> typedQuery = entityManager.createQuery(EXISTS_BY_NAME_EQUALS, Boolean.class);
+        typedQuery.setParameter("name", name);
+        return typedQuery.getSingleResult();
     }
-
 }

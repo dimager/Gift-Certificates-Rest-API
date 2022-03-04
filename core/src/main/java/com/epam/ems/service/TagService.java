@@ -1,9 +1,9 @@
 package com.epam.ems.service;
 
 import com.epam.ems.entity.Tag;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 
 /**
@@ -12,15 +12,23 @@ import java.util.List;
 @Service
 public interface TagService {
 
+
+
     /**
      * Allows getting list of all {@link Tag tags} from DB.
-     *  @return List of {@link Tag tags}.
+     * @param size page size
+     * @param offset offset
+     * @param webMvcLinkBuilder controller link builder
+     * @return  List of {@link Tag tags}.
      */
-    List<Tag> getAllTags();
+    CollectionModel<Tag> getAllTags(int size, int offset, WebMvcLinkBuilder webMvcLinkBuilder);
 
+
+    Tag getMostPopularTag();
 
     /**
      * Allows getting {@link Tag} by id from DB.
+     *
      * @param id Tag`s id.
      * @return {@link Tag} entity
      */
@@ -29,6 +37,7 @@ public interface TagService {
 
     /**
      * Allows updating {@link Tag} entity in DB.
+     *
      * @param tag tag with new data.
      * @return updated {@link Tag}.
      */
@@ -37,6 +46,7 @@ public interface TagService {
 
     /**
      * Allows creating tag entity in DB.
+     *
      * @param tag new {@link Tag}
      * @return tag with generated {@link Tag} id.
      */
@@ -44,6 +54,7 @@ public interface TagService {
 
     /**
      * Allows getting {@link Tag tag} by name.
+     *
      * @param name of {@link Tag tag}which should be found.
      * @return tag
      */
@@ -52,6 +63,7 @@ public interface TagService {
 
     /**
      * Allows deleting {@link Tag} from DB
+     *
      * @param id Tag`s id.
      * @return true - if tag is deleted,
      */
@@ -59,6 +71,7 @@ public interface TagService {
 
     /**
      * Allows checking tag existence by name
+     *
      * @param name {@link Tag} pattern
      * @return true - if ta is found, otherwise false
      */
