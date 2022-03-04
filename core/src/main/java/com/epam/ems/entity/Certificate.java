@@ -18,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -83,6 +84,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Setter
     @ManyToMany
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Valid
     @JoinTable(name = "certificate_tags",
             joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tag_id"))

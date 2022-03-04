@@ -64,6 +64,9 @@ public class OrderServiceImpl implements OrderService {
                 pageService.isPageExist(page, totalSize, offset);
                 orders = orderDao.getAllOrders(size, offset);
             }
+            for (Order order : orders) {
+                order.getOrderCertificates().forEach(oc -> oc.getCertificate().setPrice(oc.getPrice()));
+            }
             PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
             List<Link> links = pageService.createLinksWithNumberParameters(size, page, totalSize, link, extraParams);
             return PagedModel.of(orders, metadata, links);
@@ -72,12 +75,13 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-
     @Override
     public Order getOrder(long id) {
         try {
             if (orderDao.isOrderExist(id)) {
-                return orderDao.getOrder(id);
+                Order order = orderDao.getOrder(id);
+                order.getOrderCertificates().forEach(oc -> oc.getCertificate().setPrice(oc.getPrice()));
+                return order;
             } else {
                 throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_FOUND + id);
             }
