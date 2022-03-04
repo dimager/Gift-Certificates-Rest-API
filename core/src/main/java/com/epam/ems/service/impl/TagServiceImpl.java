@@ -5,8 +5,6 @@ import com.epam.ems.entity.Tag;
 import com.epam.ems.service.PageService;
 import com.epam.ems.service.TagService;
 import com.epam.ems.service.exception.ServiceException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.CollectionModel;
@@ -28,6 +26,7 @@ public class TagServiceImpl implements TagService {
     private static final String MSG_TAG_WAS_NOT_FOUND_BY_NAME = "30205;Tag was not found by name. Tag name=";
     private static final String MSG_TAG_WAS_NOT_DELETED = "30206;Tag was not deleted. Tag id=";
     private static final String MSG_TAG_EXIST = "30207;Tag exist. name=";
+    private static final String MSG_WITH_NAME_EXIST = "30209;Tag with name exist. name=";
     private final TagDao tagDao;
     private final PageService pageService;
 
@@ -36,7 +35,6 @@ public class TagServiceImpl implements TagService {
         this.tagDao = tagDao;
         this.pageService = pageService;
     }
-
 
     @Override
     @Transactional
@@ -80,6 +78,9 @@ public class TagServiceImpl implements TagService {
             } else {
                 throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId());
             }
+        } catch (DataIntegrityViolationException e) {
+            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_WITH_NAME_EXIST + tag.getName());
+
         } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId(), e.getCause());
         }
@@ -123,7 +124,7 @@ public class TagServiceImpl implements TagService {
                 throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_DELETED + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_DELETED + id, e.getCause());
         }
     }
 
