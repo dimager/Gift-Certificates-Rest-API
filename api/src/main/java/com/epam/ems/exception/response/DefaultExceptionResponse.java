@@ -11,7 +11,6 @@ public class DefaultExceptionResponse {
     public DefaultExceptionResponse() {
     }
 
-
     public DefaultExceptionResponse(String message) {
         this.message = message;
     }

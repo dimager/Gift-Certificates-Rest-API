@@ -1,21 +1,30 @@
 package com.epam.ems.controller;
 
+import com.epam.ems.converter.UserConverter;
+import com.epam.ems.dto.UserDTO;
 import com.epam.ems.entity.User;
+import com.epam.ems.exception.JwtAuthenticationException;
+import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static com.epam.ems.security.Permission.USERINFO_READ;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -24,10 +33,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/users")
 public class UserController {
     private UserService userService;
+    private UserConverter userConverter;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserConverter userConverter, JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
+        this.userConverter = userConverter;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
 
@@ -39,13 +52,16 @@ public class UserController {
      * @return list of users
      */
     @GetMapping
-    public CollectionModel<User> getUsers(@RequestParam(defaultValue = "10") int size,
-                                          @RequestParam(defaultValue = "1") int page) {
-        PagedModel<User> userList = userService.getUsers(size, page, linkTo(UserController.class));
-        userList.forEach(user -> user.add(linkTo(methodOn(UserController.class).getUser(user.getId())).withSelfRel()));
-        userList.forEach(user -> user.getOrders().
-                forEach(order -> order.add(linkTo(methodOn(OrderController.class).getOrder(order.getId())).withRel("Order"))));
-        return userList;
+    @PreAuthorize("hasAuthority('user:read')")
+    public CollectionModel<UserDTO> getUsers(@RequestParam(defaultValue = "10") int size,
+                                             @RequestParam(defaultValue = "1") int page) {
+        PagedModel<User> userPageModel = userService.getUsers(size, page, linkTo(UserController.class));
+        List<UserDTO> userDTOList = userPageModel.getContent().stream().map(user -> userConverter.convertToDto(user)).collect(Collectors.toList());
+        PagedModel<UserDTO> userDTOPagedModel = PagedModel.of(userDTOList, userPageModel.getMetadata(), userPageModel.getLinks());
+        for (UserDTO user : userDTOPagedModel.getContent()) {
+            user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(user.getId()), null)).withRel("Orders"));
+        }
+        return userDTOPagedModel;
     }
 
     /**
@@ -55,22 +71,23 @@ public class UserController {
      * @return user data
      */
     @GetMapping("{id}")
-    public User getUser(@PathVariable long id) {
-        User user = userService.getUser(id);
-        user.add(linkTo(methodOn(UserController.class).getUser(user.getId())).withSelfRel());
-        user.getOrders().forEach(order -> order.add(linkTo(methodOn(OrderController.class).getOrder(order.getId())).withRel("Order")));
+    @PreAuthorize("hasAuthority('user:read') or hasAuthority('userinfo:read')")
+    public UserDTO getUser(@RequestHeader(name = "Authorization") String token,
+                           @PathVariable long id) {
+        if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USERINFO_READ.getPermission()))) {
+            if (id == jwtTokenProvider.getId(token)) {
+                UserDTO user = userConverter.convertToDto(userService.getUser(id));
+                user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
+            }
+            else {
+                throw new JwtAuthenticationException("Access denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        UserDTO user = userConverter.convertToDto(userService.getUser(id));
+        user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
         return user;
     }
 
-    /**
-     * Allows creating user
-     *
-     * @param user user data
-     * @return created user with id
-     */
-    @PostMapping
-    public User createUser(@RequestBody @Valid User user) {
-        return userService.create(user);
-    }
 
 }

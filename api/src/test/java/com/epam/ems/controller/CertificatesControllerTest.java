@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +34,13 @@ class CertificatesControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+            ".eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxfQ" +
+            ".H71fwDZiE6rGHBTPMJMmkibsJsCDdT7ZvlaNtbBZK0U";
+
+    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
+            ".eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjJ9" +
+            ".XPsWmLWFGE-xCLnGw3GdREpHe2TfjUNs9hwVKoO1z84";
     @Test
     void getCertificates() throws Exception {
         mvc.perform(get("/certificates"))
@@ -60,21 +68,23 @@ class CertificatesControllerTest {
     @Test
     void deleteCertificate() throws Exception {
         int certificateId = 220;
-        mvc.perform(delete("/certificates/" + certificateId)).andExpect(status().isOk());
-        mvc.perform(get("/certificates/" + certificateId)).andExpect(status().isNotFound());
+        mvc.perform(delete("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isOk());
+        mvc.perform(delete("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, userToken)).andExpect(status().isForbidden());
+        mvc.perform(get("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isNotFound());
     }
 
     @Test
     void deleteMissingCertificate() throws Exception {
         int certificateId = 11220;
-        mvc.perform(delete("/certificates/" + certificateId)).andExpect(status().isNotFound());
+        mvc.perform(delete("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isNotFound());
+        mvc.perform(delete("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, userToken)).andExpect(status().isForbidden());
     }
 
     @Test
     void addCertificate() throws Exception {
         String newCert = "{\"name\": \"new_cert1\",\"description\": \"new_desc\",\"price\": 83.0,\"duration\": " +
                 "4,\"tags\": [{\"name\": \"auto\" },{\"name\": \"food\"},{\"name\": \"newtag101\"}]}\n";
-        MvcResult result = mvc.perform(post("/certificates").contentType(MediaType.APPLICATION_JSON).content(newCert))
+        MvcResult result = mvc.perform(post("/certificates").header(HttpHeaders.AUTHORIZATION, adminToken).contentType(MediaType.APPLICATION_JSON).content(newCert))
                 .andExpect(status().isOk())
                 .andReturn();
         Certificate certificate = mapFromJson(result.getResponse().getContentAsString(), Certificate.class);
@@ -99,12 +109,16 @@ class CertificatesControllerTest {
         certificate.setName("newName");
         certificate.setDescription("newDescription");
         certificate.setPrice(new BigDecimal("10.53"));
-        mvc.perform(put("/certificates/" + certificate.getId())
+        mvc.perform(put("/certificates/" + certificate.getId()).header(HttpHeaders.AUTHORIZATION, adminToken)
                         .contentType(MediaType.APPLICATION_JSON).content(mapToJson(certificate)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(certificate.getName()))
                 .andExpect(jsonPath("$.description").value(certificate.getDescription()))
                 .andExpect(jsonPath("$.price").value(certificate.getPrice().toString()));
+
+        mvc.perform(put("/certificates/" + certificate.getId()).header(HttpHeaders.AUTHORIZATION, userToken)
+                        .contentType(MediaType.APPLICATION_JSON).content(mapToJson(certificate)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -112,12 +126,14 @@ class CertificatesControllerTest {
         short newDuration = 20;
         String newCertJson = "{\"name\": \"new_cert1\",\"description\": \"new_desc\",\"price\": 83.0,\"duration\": " +
                 "4,\"tags\": [{\"name\": \"auto\" },{\"name\": \"food\"},{\"name\": \"newtag101\"}]}\n";
-        MvcResult result = mvc.perform(post("/certificates").contentType(MediaType.APPLICATION_JSON).content(newCertJson))
+        MvcResult result = mvc.perform(post("/certificates").header(HttpHeaders.AUTHORIZATION, adminToken).contentType(MediaType.APPLICATION_JSON).content(newCertJson))
                 .andExpect(status().isOk()).andReturn();
         Certificate certificate = mapFromJson(result.getResponse().getContentAsString(), Certificate.class);
         certificate.setDuration(newDuration);
-        mvc.perform(patch("/certificates/" + certificate.getId()).contentType(MediaType.APPLICATION_JSON).content(mapToJson(certificate)))
+        mvc.perform(patch("/certificates/" + certificate.getId()).header(HttpHeaders.AUTHORIZATION, adminToken).contentType(MediaType.APPLICATION_JSON).content(mapToJson(certificate)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.duration").value(String.valueOf(newDuration)));
+        mvc.perform(patch("/certificates/" + certificate.getId()).header(HttpHeaders.AUTHORIZATION, userToken).contentType(MediaType.APPLICATION_JSON).content(mapToJson(certificate)))
+                .andExpect(status().isForbidden());
     }
 }

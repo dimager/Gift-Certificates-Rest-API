@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,20 +61,6 @@ public class CertificatesController {
         return certificates;
     }
 
-    private void createLinks(Certificate certificate) {
-        certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
-        for (Tag tag : certificate.getTags()) {
-            if (!tag.hasLink("self")) {
-                tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
-            }
-            if (!tag.hasLink("Certificates")) {
-                String[] tagName = {tag.getName()};
-                tag.add(Link.of(linkTo(CertificatesController.class)
-                                .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
-                        .withRel("Certificates"));
-            }
-        }
-    }
 
     /**
      * Allows getting certificate  by id.
@@ -95,6 +82,7 @@ public class CertificatesController {
      * @return true or false
      */
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAuthority('certificate:write')")
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable long id) {
         if (certificateService.deleteCertificate(id)) {
             return ResponseEntity.ok().build();
@@ -111,6 +99,7 @@ public class CertificatesController {
      * @return created certificate with id
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('certificate:write')")
     public Certificate addCertificate(@RequestBody @Valid Certificate certificate) {
         certificate = certificateService.createCertificate(certificate);
         this.createLinks(certificate);
@@ -125,6 +114,7 @@ public class CertificatesController {
      * @return updated certificate
      */
     @PutMapping("{id}")
+    @PreAuthorize("hasAuthority('certificate:write')")
     public Certificate updateCertificate(@PathVariable long id, @RequestBody @Valid Certificate certificate) {
         certificate.setId(id);
         certificate = certificateService.updateCertificate(certificate);
@@ -140,11 +130,28 @@ public class CertificatesController {
      * @return updated certificate
      */
     @PatchMapping(path = "{id}")
+    @PreAuthorize("hasAuthority('certificate:write')")
     public Certificate updateCertificateDuration(@PathVariable long id, @RequestBody Certificate certificate) {
         certificateService.updateDuration(id, certificate);
         certificate = certificateService.getCertificate(id);
         this.createLinks(certificate);
         return certificate;
+    }
+
+
+    private void createLinks(Certificate certificate) {
+        certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
+        for (Tag tag : certificate.getTags()) {
+            if (!tag.hasLink("self")) {
+                tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+            }
+            if (!tag.hasLink("Certificates")) {
+                String[] tagName = {tag.getName()};
+                tag.add(Link.of(linkTo(CertificatesController.class)
+                                .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
+                        .withRel("Certificates"));
+            }
+        }
     }
 }
 

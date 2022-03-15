@@ -14,6 +14,8 @@ public class UserDaoImpl implements UserDao {
     private final static String SELECT_USER_BY_ID = "SELECT u FROM User u where u.id = :id";
     private final static String SELECT_ALL_USERS = "SELECT u FROM User u";
     private final static String EXISTS_BY_ID_EQUALS = "select (count(u) > 0) from User u where u.id = :id";
+    private final static String SELECT_USER_BY_USERNAME = "SELECT u FROM User u where u.username = :username";
+
 
     private final EntityManager entityManager;
 
@@ -26,6 +28,13 @@ public class UserDaoImpl implements UserDao {
     public User getUser(long id) {
         TypedQuery<User> typedQuery = entityManager.createQuery(SELECT_USER_BY_ID, User.class);
         typedQuery.setParameter("id", id);
+        return typedQuery.getSingleResult();
+    }
+
+    @Override
+    public User getUser(String username) {
+        TypedQuery<User> typedQuery =  entityManager.createQuery(SELECT_USER_BY_USERNAME,User.class);
+        typedQuery.setParameter("username", username);
         return typedQuery.getSingleResult();
     }
 

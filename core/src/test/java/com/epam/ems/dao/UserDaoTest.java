@@ -4,7 +4,6 @@ import com.epam.ems.TestDaoConfig;
 import com.epam.ems.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +24,6 @@ class UserDaoTest {
     void getUser() {
         int userId = 1;
         int missingUserId = -1;
-        System.out.println(userDao.getUser(userId));
         assertAll(() -> assertDoesNotThrow(() -> userDao.getUser(userId)),
                 () -> assertThrows(EmptyResultDataAccessException.class, () -> userDao.getUser(missingUserId)));
     }
@@ -48,7 +46,8 @@ class UserDaoTest {
     @Transactional
     void create() {
         User user = new User();
-        user.setUsername("newUser");
+        user.setUsername("newUser321");
+        user.setPassword("password");
         User createdUser = userDao.create(user);
         assertAll(() -> assertTrue(userDao.isUserExist(createdUser.getId())));
 

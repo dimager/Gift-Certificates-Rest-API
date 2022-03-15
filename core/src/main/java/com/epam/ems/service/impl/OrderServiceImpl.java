@@ -113,7 +113,6 @@ public class OrderServiceImpl implements OrderService {
         } catch (ServiceException e) {
             throw new ServiceException(e.getStatus(), e.getMessage(), e.getCause());
         } catch (RuntimeException e) {
-            e.printStackTrace();
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_CREATED + order.getId(), e.getCause());
         }
 
