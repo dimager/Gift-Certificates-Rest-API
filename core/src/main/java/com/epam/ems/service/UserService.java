@@ -13,6 +13,15 @@ public interface UserService {
      */
     User getUser(long id);
 
+
+    /**
+     * Allows getting user by username
+     *
+     * @param username user id
+     * @return uset info
+     */
+    User getUser(String  username);
+
     /**
      * Allows getting list of users
      *

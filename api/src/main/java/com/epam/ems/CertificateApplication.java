@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.hateoas.HypermediaAutoConfiguratio
 
 @SpringBootApplication(exclude = HypermediaAutoConfiguration.class)
 public class CertificateApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(CertificateApplication.class, args);
     }

@@ -77,7 +77,6 @@ public class CertificateServiceImpl implements CertificateService {
             PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
             return PagedModel.of(certificates, metadata, links);
         } catch (RuntimeException e) {
-            e.printStackTrace();
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATES_WERE_NOT_FOUND, e.getCause());
         }
     }

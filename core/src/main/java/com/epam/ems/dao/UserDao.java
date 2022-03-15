@@ -13,6 +13,15 @@ public interface UserDao {
      */
     User getUser(long id);
 
+
+    /**
+     * Allows getting user by username
+     *
+     * @param username user username
+     * @return user data
+     */
+    User getUser(String username);
+
     /**
      * Allows getting list of all users
      *

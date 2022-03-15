@@ -4,11 +4,21 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 
-public class ServiceExceptionResponse {
+public class ExceptionWithCodeResponse {
 
     private String message;
     private String errorCode;
     private HttpStatus httpStatus;
+
+    public ExceptionWithCodeResponse(String reason, HttpStatus status) {
+        this.httpStatus = status;
+        String[] errorMessage = reason.split(";");
+        errorCode=errorMessage[0];
+        message=errorMessage[1];
+    }
+
+
+
 
     public String getMessage() {
         return message;
@@ -38,7 +48,7 @@ public class ServiceExceptionResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ServiceExceptionResponse that = (ServiceExceptionResponse) o;
+        ExceptionWithCodeResponse that = (ExceptionWithCodeResponse) o;
         return Objects.equals(message, that.message) && Objects.equals(errorCode, that.errorCode) && httpStatus == that.httpStatus;
     }
 

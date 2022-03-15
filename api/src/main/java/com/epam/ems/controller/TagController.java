@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,18 +46,11 @@ public class TagController {
                                            @RequestParam(name = "page", defaultValue = "1") int page) {
         CollectionModel<Tag> tags = tagService.getAllTags(size, page, linkTo(TagController.class));
         for (Tag tag : tags.getContent()) {
-            System.out.println(tag);
             this.createLinks(tag);
         }
         return tags;
     }
 
-    private void createLinks(Tag tag) {
-        tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
-        tag.add(Link.of(linkTo(CertificatesController.class)
-                        .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
-                .withRel("Certificates"));
-    }
 
     /**
      * Allows getting tag info
@@ -78,6 +72,7 @@ public class TagController {
      * @return created tag with id
      */
     @PostMapping(consumes = {"application/json"})
+    @PreAuthorize("hasAuthority('tag:write')")
     public Tag addTag(@RequestBody @Valid Tag tag) {
         tag = tagService.createTag(tag);
         createLinks(tag);
@@ -92,6 +87,7 @@ public class TagController {
      * @return updated tag
      */
     @PutMapping("{id}")
+    @PreAuthorize("hasAuthority('tag:write')")
     public Tag updateTag(@PathVariable long id, @RequestBody @Valid Tag tag) {
         tag.setId(id);
         tag = tagService.updateTag(tag);
@@ -119,11 +115,19 @@ public class TagController {
      */
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAuthority('tag:write')")
     public ResponseEntity<Tag> deleteTag(@PathVariable long id) {
         if (tagService.deleteTag(id)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private void createLinks(Tag tag) {
+        tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
+        tag.add(Link.of(linkTo(CertificatesController.class)
+                        .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
+                .withRel("Certificates"));
     }
 }

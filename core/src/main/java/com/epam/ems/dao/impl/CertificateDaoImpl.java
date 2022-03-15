@@ -3,9 +3,7 @@ package com.epam.ems.dao.impl;
 import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
-import com.epam.ems.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -169,10 +167,8 @@ public class CertificateDaoImpl implements CertificateDao {
                     builder.and(builder.isFalse(root.get("isArchived")),
                             builder.or(builder.like(root.get("name"), builder.parameter(String.class, "pattern")),
                                     builder.like(root.get("description"), builder.parameter(String.class, "pattern")))));
-            StringBuilder pattern = new StringBuilder();
-            pattern.append("%").append(filterPattern.get()).append("%");
             tq = entityManager.createQuery(criteriaQuery);
-            tq.setParameter("pattern", pattern.toString());
+            tq.setParameter("pattern", "%" + filterPattern.get() + "%");
         }
         return tq;
     }

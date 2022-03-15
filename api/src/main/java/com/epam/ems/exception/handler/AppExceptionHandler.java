@@ -1,7 +1,9 @@
 package com.epam.ems.exception.handler;
 
+import com.epam.ems.exception.ControllerException;
+import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.exception.response.DefaultExceptionResponse;
-import com.epam.ems.exception.response.ServiceExceptionResponse;
+import com.epam.ems.exception.response.ExceptionWithCodeResponse;
 import com.epam.ems.exception.response.ValidationExceptionResponse;
 import com.epam.ems.service.exception.ServiceException;
 import org.apache.logging.log4j.LogManager;
@@ -46,15 +48,19 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, status);
     }
 
+
     @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<ServiceExceptionResponse> handleServiceException(ServiceException e) {
-        String[] errorMessage = Objects.requireNonNull(e.getReason()).split(";");
-        ServiceExceptionResponse exceptionResponse = new ServiceExceptionResponse();
-        exceptionResponse.setHttpStatus(e.getStatus());
-        exceptionResponse.setErrorCode(errorMessage[0]);
-        exceptionResponse.setMessage(errorMessage[1]);
+    public ResponseEntity<ExceptionWithCodeResponse> handleServiceException(ServiceException e) {
+        ExceptionWithCodeResponse exceptionResponse = new ExceptionWithCodeResponse(e.getReason(),e.getStatus());
         logger.error(e);
         return ResponseEntity.status(e.getStatus()).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(ControllerException.class)
+    public ResponseEntity<ExceptionWithCodeResponse> handleControllerException(ControllerException e) {
+        ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(e.getReason(),e.getStatus());
+        logger.error(e);
+        return ResponseEntity.status(e.getStatus()).body(response);
     }
 
     @Override
@@ -85,4 +91,12 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(defaultExceptionResponse, headers, status);
     }
 
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<DefaultExceptionResponse> handleIncorectUserId(JwtAuthenticationException e) {
+        DefaultExceptionResponse defaultExceptionResponse = new DefaultExceptionResponse();
+        defaultExceptionResponse.setMessage(e.getMessage());
+        defaultExceptionResponse.setHttpStatus(e.getHttpStatus());
+        logger.error(e);
+        return ResponseEntity.status(e.getHttpStatus()).body(defaultExceptionResponse);
+    }
 }
