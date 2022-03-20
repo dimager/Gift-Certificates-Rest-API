@@ -1,36 +1,19 @@
 package com.epam.ems.exception.response;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class ValidationExceptionResponse {
     private HttpStatus httpStatus;
     private String errorCode;
     private Map<String, String> errors = new HashMap();
 
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public void setHttpStatus(HttpStatus httpStatus) {
+    public ValidationExceptionResponse(HttpStatus httpStatus, String errorCode) {
         this.httpStatus = httpStatus;
-    }
-
-    public Map<String, String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(Map<String, String> errors) {
-        this.errors = errors;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
     }
 }

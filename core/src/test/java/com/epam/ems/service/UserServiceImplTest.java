@@ -26,6 +26,7 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+
     private UserService userService;
     @Mock
     private PageService pageService;

@@ -38,7 +38,6 @@ public class User extends BaseEntity {
 
     @Getter
     @Setter
-    @Size(message = "Incorrect username length", min = 1, max = 45)
     @NotNull
     @Column(length = 45)
     private String username;

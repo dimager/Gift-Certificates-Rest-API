@@ -4,9 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.epam.ems.exception.JwtAuthenticationException;
-import com.epam.ems.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -23,6 +21,7 @@ import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
+    private static final String CREATING_TOKEN_CODE = "40301";
     private final UserDetailsService userDetailsService;
     @Value("${jwt.secretPhrase}")
     private String secretPhrase;
@@ -36,6 +35,7 @@ public class JwtTokenProvider {
         this.userDetailsService = userDetailsService;
     }
 
+
     public String createToken(String username, String role, Long id) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secretPhrase);
@@ -47,21 +47,17 @@ public class JwtTokenProvider {
                     .withClaim("id", id)
                     .sign(algorithm);
         } catch (JWTCreationException e) {
-            throw new ServiceException(HttpStatus.FORBIDDEN, "31102;IInvalid Signing configuration / Couldn't convert Claims.");
+            throw new JwtAuthenticationException(CREATING_TOKEN_CODE, HttpStatus.FORBIDDEN);
         }
     }
 
     public boolean verifyToken(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secretPhrase);
-            JWTVerifier jwtVerifier = JWT.require(algorithm)
-                    .withIssuer(issuer)
-                    .build();
-            jwtVerifier.verify(token);
-            return true;
-        } catch (JWTVerificationException e) {
-            throw new JwtAuthenticationException(e.getMessage(), HttpStatus.UNAUTHORIZED);
-        }
+        Algorithm algorithm = Algorithm.HMAC256(secretPhrase);
+        JWTVerifier jwtVerifier = JWT.require(algorithm)
+                .withIssuer(issuer)
+                .build();
+        jwtVerifier.verify(token);
+        return true;
     }
 
 

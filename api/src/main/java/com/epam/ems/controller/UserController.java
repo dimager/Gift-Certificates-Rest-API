@@ -35,6 +35,7 @@ public class UserController {
     private UserService userService;
     private UserConverter userConverter;
     private JwtTokenProvider jwtTokenProvider;
+    private static final String ACCESS_DENIED_CODE = "40300";
 
     @Autowired
     public UserController(UserService userService, UserConverter userConverter, JwtTokenProvider jwtTokenProvider) {
@@ -81,7 +82,7 @@ public class UserController {
                 user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
             }
             else {
-                throw new JwtAuthenticationException("Access denied", HttpStatus.FORBIDDEN);
+                throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
             }
         }
         UserDTO user = userConverter.convertToDto(userService.getUser(id));

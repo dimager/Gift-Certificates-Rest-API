@@ -2,6 +2,7 @@ package com.epam.ems.entity;
 
 
 import com.epam.ems.listener.AuditListener;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -45,7 +46,7 @@ public class Order extends BaseEntity {
     private Timestamp purchaseDate;
 
 
-    @PositiveOrZero(message = "Cost should be positive")
+    @PositiveOrZero(message = "30108")
     @Getter
     @Setter
     @Column(nullable = false, precision = 10, scale = 2)
@@ -60,7 +61,7 @@ public class Order extends BaseEntity {
 
     @Getter
     @Setter
-    @NotEmpty(message = "Order should have certificates ")
+    @NotEmpty(message = "30106")
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<OrderCertificate> orderCertificates = new ArrayList<>();
 

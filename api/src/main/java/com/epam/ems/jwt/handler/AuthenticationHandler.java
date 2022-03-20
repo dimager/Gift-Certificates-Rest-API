@@ -1,5 +1,6 @@
 package com.epam.ems.jwt.handler;
 
+import com.epam.ems.provider.MessageProvider;
 import com.epam.ems.entity.User;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.jwt.response.FailAuthenticationResponse;
@@ -18,7 +19,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -28,6 +28,10 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
     private static final Logger logger = LogManager.getLogger(AuthenticationHandler.class);
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private String AUTH_FAIL = "auth.fail";
+    private String AUTH_FAIL_CODE = "30111";
+    private String AUTH_SUCCESS = "auth.success";
+    private String AUTH_SUCCESS_CODE = "30200";
 
     @Autowired
     public AuthenticationHandler(UserService userService, JwtTokenProvider jwtTokenProvider) {
@@ -37,12 +41,12 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-            throws IOException, ServletException {
+            throws IOException {
         final UserDetails userDetail = (UserDetails) authentication.getPrincipal();
         User user = userService.getUser(userDetail.getUsername());
         final String token = jwtTokenProvider.createToken(user.getUsername(), user.getRole().name(), user.getId());
         SuccessfulAuthenticationResponse jwtResponse =
-                new SuccessfulAuthenticationResponse("Successfully logged in", user.getUsername(), token);
+                new SuccessfulAuthenticationResponse(MessageProvider.getLocalizedMessage(AUTH_SUCCESS), user.getUsername(), AUTH_SUCCESS_CODE, token);
         String body = new ObjectMapper().writeValueAsString(jwtResponse);
         response.setContentType(MediaType.APPLICATION_JSON.toString());
         response.getWriter().write(body);
@@ -51,10 +55,10 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                        AuthenticationException exception) throws IOException, ServletException {
+                                        AuthenticationException exception) throws IOException {
         logger.error(exception.getMessage());
         FailAuthenticationResponse jwtResponse =
-                new FailAuthenticationResponse(HttpStatus.UNAUTHORIZED,30111,"Incorrect username or password");
+                new FailAuthenticationResponse(HttpStatus.BAD_REQUEST, AUTH_FAIL_CODE, MessageProvider.getLocalizedMessage(AUTH_FAIL));
         String body = new ObjectMapper().writeValueAsString(jwtResponse);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

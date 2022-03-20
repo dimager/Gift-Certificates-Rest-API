@@ -19,14 +19,13 @@ import java.util.List;
 
 @Service
 public class TagServiceImpl implements TagService {
-    private static final String MSG_TAGS_WERE_NOT_FOUND = "30201;Tags were not found.";
-    private static final String MSG_TAG_WAS_NOT_FOUND = "30202;Tag was not found. Tag id=";
-    private static final String MSG_TAG_WAS_NOT_UPDATED = "30203;Tag was not updated. Tag id=";
-    private static final String MSG_TAG_WAS_NOT_CREATED = "30204;Tag was not created. Tag name=";
-    private static final String MSG_TAG_WAS_NOT_FOUND_BY_NAME = "30205;Tag was not found by name. Tag name=";
-    private static final String MSG_TAG_WAS_NOT_DELETED = "30206;Tag was not deleted. Tag id=";
-    private static final String MSG_TAG_EXIST = "30207;Tag exist. name=";
-    private static final String MSG_WITH_NAME_EXIST = "30209;Tag with name exist. name=";
+    private static final String MSG_TAGS_WERE_NOT_FOUND = "30201";
+    private static final String MSG_TAG_WAS_NOT_FOUND = "30202";
+    private static final String MSG_TAG_WAS_NOT_UPDATED = "30203";
+    private static final String MSG_TAG_WAS_NOT_CREATED = "30204";
+    private static final String MSG_TAG_WAS_NOT_FOUND_BY_NAME = "30205";
+    private static final String MSG_TAG_WAS_NOT_DELETED = "30206";
+    private static final String MSG_TAG_EXIST = "30207";
     private final TagDao tagDao;
     private final PageService pageService;
 
@@ -47,7 +46,7 @@ public class TagServiceImpl implements TagService {
             PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
             return PagedModel.of(tags, metadata, links);
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAGS_WERE_NOT_FOUND, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAGS_WERE_NOT_FOUND);
         }
     }
 
@@ -62,10 +61,10 @@ public class TagServiceImpl implements TagService {
             if (tagDao.isTagExistById(id)) {
                 return tagDao.getById(id);
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND, id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND, id);
         }
     }
 
@@ -76,13 +75,13 @@ public class TagServiceImpl implements TagService {
             if (tagDao.isTagExistById(tag.getId())) {
                 return tagDao.update(tag);
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId());
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED, tag.getId());
             }
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_WITH_NAME_EXIST + tag.getName());
+            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_TAG_EXIST, tag.getName());
 
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED + tag.getId(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_UPDATED, tag.getId());
         }
     }
 
@@ -93,10 +92,10 @@ public class TagServiceImpl implements TagService {
         try {
             return tagDao.create(tag);
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_TAG_EXIST + tag.getName(), e.getCause());
+            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_TAG_EXIST, tag.getName());
 
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_CREATED + tag.getName(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_CREATED, tag.getName());
         }
     }
 
@@ -106,10 +105,10 @@ public class TagServiceImpl implements TagService {
             if (this.isTagExistByName(name)) {
                 return tagDao.getByName(name);
             } else {
-                throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND_BY_NAME + name);
+                throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND_BY_NAME, name);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND_BY_NAME + name, e.getCause());
+            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, MSG_TAG_WAS_NOT_FOUND_BY_NAME, name);
         }
     }
 
@@ -121,10 +120,10 @@ public class TagServiceImpl implements TagService {
             if (tagDao.isTagExistById(id)) {
                 return tagDao.delete(id);
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_FOUND, id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_DELETED + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_TAG_WAS_NOT_DELETED, id);
         }
     }
 

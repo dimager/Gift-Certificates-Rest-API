@@ -20,9 +20,8 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private static final String MSG_USER_WAS_NOT_FOUND = "30502;User was not found. User id=";
-    private static final String MSG_USER_WAS_NOT_CREATED = "30502;User was not created. User name=";
-    private static final String USER_EXIST = ". Username already exists";
+    private static final String MSG_USER_WAS_NOT_FOUND = "30502";
+    private static final String MSG_USER_WAS_NOT_CREATED = "30503";
     private final UserDao userDao;
     private final PageService pageService;
     private final PasswordEncoder passwordEncoder;
@@ -42,7 +41,7 @@ public class UserServiceImpl implements UserService {
         if (userDao.isUserExist(id)) {
             return userDao.getUser(id);
         } else {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_USER_WAS_NOT_FOUND + id);
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_USER_WAS_NOT_FOUND, id);
         }
     }
 
@@ -67,7 +66,7 @@ public class UserServiceImpl implements UserService {
         if (userDao.isUserExist(id)) {
             return true;
         } else {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_USER_WAS_NOT_FOUND + id);
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_USER_WAS_NOT_FOUND, id);
         }
     }
 
@@ -78,9 +77,9 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             return userDao.create(user);
         } catch (DataIntegrityViolationException e) {
-            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_USER_WAS_NOT_CREATED + user.getUsername() + USER_EXIST);
+            throw new ServiceException(HttpStatus.BAD_REQUEST, MSG_USER_WAS_NOT_CREATED, user.getUsername());
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_USER_WAS_NOT_CREATED + user.getUsername());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_USER_WAS_NOT_CREATED, user.getUsername());
         }
     }
 }

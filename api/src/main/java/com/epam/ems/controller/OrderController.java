@@ -8,7 +8,6 @@ import com.epam.ems.exception.ControllerException;
 import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.service.OrderService;
-import com.epam.ems.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
@@ -35,6 +34,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping(value = "/orders")
 public class OrderController {
+    private static final String ACCESS_DENIED_CODE = "40300";
+    private static final String USERPARAMETER_IS_ABSENT_CODE =  "40000";
     private final OrderService orderService;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -66,7 +67,7 @@ public class OrderController {
                 orders.getContent().forEach(this::createLinks);
                 return orders;
             } else {
-                throw new JwtAuthenticationException("Access denied", HttpStatus.FORBIDDEN);
+                throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
             }
         }
         CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
@@ -91,7 +92,7 @@ public class OrderController {
             if (order.getUser().getId() == jwtTokenProvider.getId(token)) {
                 return order;
             } else {
-                throw new JwtAuthenticationException("Access denied", HttpStatus.FORBIDDEN);
+                throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
             }
         }
         return order;
@@ -117,7 +118,7 @@ public class OrderController {
                     this.createLinks(order);
                     return order;
                 } else {
-                    throw new JwtAuthenticationException("Access denied", HttpStatus.FORBIDDEN);
+                    throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
                 }
             } else {
                 order = orderService.createOrder(userId.get(), order);
@@ -125,7 +126,7 @@ public class OrderController {
                 return order;
             }
         } else {
-            throw new ControllerException(HttpStatus.BAD_REQUEST, "30605;userId is absent");
+            throw new ControllerException(HttpStatus.BAD_REQUEST, USERPARAMETER_IS_ABSENT_CODE );
         }
     }
 

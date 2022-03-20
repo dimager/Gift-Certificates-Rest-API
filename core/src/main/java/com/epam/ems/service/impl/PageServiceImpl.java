@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 public class PageServiceImpl implements PageService {
-    private static final String MSG_PAGE_NOT_FOUND = "30607;Page not found. Page=";
+    private static final String MSG_PAGE_NOT_FOUND = "30607";
 
     @Override
     public List<Link> createLinksWithNumberParameters(int size, int page, long totalSize, WebMvcLinkBuilder link, HashMap<String, Number> extraParams) {

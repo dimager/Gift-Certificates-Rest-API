@@ -1,15 +1,16 @@
 package com.epam.ems.jwt.response;
 
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@Data
+@Getter
 public class FailAuthenticationResponse {
-    private HttpStatus httpStatus;
-    private int code;
-    private String message;
+    private final HttpStatus httpStatus;
+    private final String code;
+    private final String message;
 
-    public FailAuthenticationResponse(HttpStatus httpStatus, int code, String message) {
+    public FailAuthenticationResponse(HttpStatus httpStatus, String code, String message) {
         this.httpStatus = httpStatus;
         this.code = code;
         this.message = message;

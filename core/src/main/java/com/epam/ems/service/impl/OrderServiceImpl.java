@@ -28,9 +28,9 @@ import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-    private static final String MSG_ORDER_WAS_NOT_FOUND = "30602;Order was not found. Order id=";
-    private static final String MSG_ORDER_WAS_NOT_CREATED = "30605;Order was not created. Order id=";
-    private static final String MSG_ORDER_WERE_NOT_FOUND = "30603;Orders were not found. Wrong user";
+    private static final String MSG_ORDER_WAS_NOT_FOUND = "30602";
+    private static final String MSG_ORDER_WAS_NOT_CREATED = "30605";
+    private static final String MSG_ORDER_WERE_NOT_FOUND = "30603";
 
     private final OrderDao orderDao;
     private final UserService userService;
@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
             List<Link> links = pageService.createLinksWithNumberParameters(size, page, totalSize, link, extraParams);
             return PagedModel.of(orders, metadata, links);
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WERE_NOT_FOUND, e);
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WERE_NOT_FOUND);
         }
     }
 
@@ -83,10 +83,10 @@ public class OrderServiceImpl implements OrderService {
                 order.getOrderCertificates().forEach(oc -> oc.getCertificate().setPrice(oc.getPrice()));
                 return order;
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_FOUND + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_FOUND, id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_FOUND + id, e);
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_FOUND, id);
         }
     }
 
@@ -111,9 +111,9 @@ public class OrderServiceImpl implements OrderService {
             }
             return orderDao.createOrder(order);
         } catch (ServiceException e) {
-            throw new ServiceException(e.getStatus(), e.getMessage(), e.getCause());
+            throw new ServiceException(e.getStatus(), e.getCode());
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_CREATED + order.getId(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_CREATED, order.getId());
         }
 
     }
