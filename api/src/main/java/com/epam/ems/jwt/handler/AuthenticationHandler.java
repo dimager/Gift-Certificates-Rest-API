@@ -1,10 +1,10 @@
 package com.epam.ems.jwt.handler;
 
-import com.epam.ems.provider.MessageProvider;
 import com.epam.ems.entity.User;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.jwt.response.FailAuthenticationResponse;
 import com.epam.ems.jwt.response.SuccessfulAuthenticationResponse;
+import com.epam.ems.provider.MessageProvider;
 import com.epam.ems.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +25,7 @@ import java.io.IOException;
 
 @Component
 public class AuthenticationHandler implements AuthenticationSuccessHandler, AuthenticationFailureHandler {
-    private static final Logger logger = LogManager.getLogger(AuthenticationHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(AuthenticationHandler.class);
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private String AUTH_FAIL = "auth.fail";
@@ -48,6 +48,7 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
         SuccessfulAuthenticationResponse jwtResponse =
                 new SuccessfulAuthenticationResponse(MessageProvider.getLocalizedMessage(AUTH_SUCCESS), user.getUsername(), AUTH_SUCCESS_CODE, token);
         String body = new ObjectMapper().writeValueAsString(jwtResponse);
+        response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON.toString());
         response.getWriter().write(body);
         response.getWriter().flush();
@@ -56,12 +57,13 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
-        logger.error(exception.getMessage());
+        LOGGER.error(exception.getMessage());
         FailAuthenticationResponse jwtResponse =
                 new FailAuthenticationResponse(HttpStatus.BAD_REQUEST, AUTH_FAIL_CODE, MessageProvider.getLocalizedMessage(AUTH_FAIL));
         String body = new ObjectMapper().writeValueAsString(jwtResponse);
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().write(body);
         response.getWriter().flush();
     }

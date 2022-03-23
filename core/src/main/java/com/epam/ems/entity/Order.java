@@ -2,7 +2,6 @@ package com.epam.ems.entity;
 
 
 import com.epam.ems.listener.AuditListener;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

@@ -3,6 +3,8 @@ package com.epam.ems.jwt.filter;
 import com.epam.ems.dto.AuthenticateUserDTO;
 import com.epam.ems.exception.JwtAuthenticationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +24,7 @@ import java.io.IOException;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+    private static final Logger LOGGER = LogManager.getLogger(AuthenticationFilter.class);
     private static final String FAILED_ATTEMPT_AUTH_CODE = "40302";
 
     @Autowired
@@ -47,7 +49,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             AuthenticateUserDTO userDTO = new ObjectMapper().readValue(request.getInputStream(), AuthenticateUserDTO.class);
             auth = this.getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
         } catch (IOException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new JwtAuthenticationException(FAILED_ATTEMPT_AUTH_CODE, HttpStatus.FORBIDDEN);
         }
         return auth;

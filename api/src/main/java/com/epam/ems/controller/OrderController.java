@@ -4,7 +4,6 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Order;
 import com.epam.ems.entity.OrderCertificate;
 import com.epam.ems.entity.Tag;
-import com.epam.ems.exception.ControllerException;
 import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.service.OrderService;
@@ -35,7 +34,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(value = "/orders")
 public class OrderController {
     private static final String ACCESS_DENIED_CODE = "40300";
-    private static final String USERPARAMETER_IS_ABSENT_CODE =  "40000";
     private final OrderService orderService;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -86,7 +84,7 @@ public class OrderController {
     public Order getOrder(@RequestHeader(name = "Authorization") String token,
                           @PathVariable long id) {
         Order order = orderService.getOrder(id);
-        createLinks(order);
+        this.createLinks(order);
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
             if (order.getUser().getId() == jwtTokenProvider.getId(token)) {
@@ -101,33 +99,20 @@ public class OrderController {
     /**
      * Allows creating order for user
      *
-     * @param userId user id
-     * @param order  order data
+     * @param order order data
      * @return created certificate with id
      */
     @PostMapping
     @PreAuthorize("hasAuthority('order:write') or hasAuthority('userorder:write')")
-    public Order createOrder(@RequestParam(required = false) Optional<Long> userId,
-                             @RequestBody @Valid Order order,
+    public Order createOrder(@RequestBody @Valid Order order,
                              @RequestHeader(name = "Authorization") String token) {
-        if (userId.isPresent()) {
-            if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
-                if (userId.get() == jwtTokenProvider.getId(token)) {
-                    order = orderService.createOrder(userId.get(), order);
-                    this.createLinks(order);
-                    return order;
-                } else {
-                    throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
-                }
-            } else {
-                order = orderService.createOrder(userId.get(), order);
-                this.createLinks(order);
-                return order;
-            }
-        } else {
-            throw new ControllerException(HttpStatus.BAD_REQUEST, USERPARAMETER_IS_ABSENT_CODE );
+        if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+            order = orderService.createOrder(jwtTokenProvider.getId(token), order);
+            this.createLinks(order);
+            return order;
         }
+        throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
     }
 
     private void createLinks(Order order) {

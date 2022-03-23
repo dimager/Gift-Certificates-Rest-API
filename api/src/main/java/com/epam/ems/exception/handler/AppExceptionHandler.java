@@ -1,10 +1,9 @@
 package com.epam.ems.exception.handler;
 
-import com.epam.ems.provider.MessageProvider;
-import com.epam.ems.exception.ControllerException;
 import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.exception.response.ExceptionWithCodeResponse;
 import com.epam.ems.exception.response.ValidationExceptionResponse;
+import com.epam.ems.provider.MessageProvider;
 import com.epam.ems.service.exception.ServiceException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,18 +62,12 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ValidationExceptionResponse response = new ValidationExceptionResponse(status, VALIDATION_EXCEPTION_CODE);
         for (FieldError fieldError : ex.getFieldErrors()) {
-            response.getErrors().put(fieldError.getField(), fieldError.getDefaultMessage());
+            response.getErrors().put(fieldError.getField(), MessageProvider.getLocalizedValidationMessage(fieldError.getDefaultMessage()));
         }
         logger.error(ex);
         return new ResponseEntity<>(response, status);
     }
 
-    @ExceptionHandler(ControllerException.class)
-    public ResponseEntity<ExceptionWithCodeResponse> handleControllerException(ControllerException e) {
-        ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(e.getReason(), e.getCode(), e.getStatus());
-        logger.error(e);
-        return ResponseEntity.status(e.getStatus()).body(response);
-    }
 
     @ExceptionHandler(JwtAuthenticationException.class)
     public ResponseEntity<ExceptionWithCodeResponse> handleIncorrectUserId(JwtAuthenticationException e) {

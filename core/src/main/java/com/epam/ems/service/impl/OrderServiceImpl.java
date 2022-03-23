@@ -111,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
             }
             return orderDao.createOrder(order);
         } catch (ServiceException e) {
-            throw new ServiceException(e.getStatus(), e.getCode());
+            throw new ServiceException(e.getStatus(), e.getCode(), e.getId());
         } catch (RuntimeException e) {
             throw new ServiceException(HttpStatus.NOT_FOUND, MSG_ORDER_WAS_NOT_CREATED, order.getId());
         }

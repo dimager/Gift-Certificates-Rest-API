@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserConverter implements Converter<User, UserDTO> {
     @Override
-    public User convertToDao(UserDTO userDTO) {
+    public User convertToEntity(UserDTO userDTO) {
         User user = new User();
         user.setUsername(userDTO.getUsername());
         return user;

@@ -3,7 +3,6 @@ package com.epam.ems.config;
 
 import com.epam.ems.jwt.filter.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,10 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.DelegatingFilterProxy;
-import org.springframework.web.filter.GenericFilterBean;
-
-import javax.servlet.ServletContext;
 
 @Configuration
 @EnableWebSecurity

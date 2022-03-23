@@ -4,6 +4,6 @@ import com.epam.ems.dto.BaseDTO;
 import com.epam.ems.entity.BaseEntity;
 
 public interface Converter <T extends BaseEntity,K extends BaseDTO> {
-    T convertToDao(K k);
+    T convertToEntity(K k);
     K convertToDto(T t);
 }

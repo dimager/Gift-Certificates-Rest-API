@@ -1,10 +1,10 @@
 package com.epam.ems.jwt.filter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.epam.ems.provider.MessageProvider;
 import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.exception.response.ExceptionWithCodeResponse;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
+import com.epam.ems.provider.MessageProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import java.io.IOException;
 
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
-    private static final Logger logger = LogManager.getLogger(JwtTokenFilter.class);
     private static final String VERIFY_TOKEN_CODE = "40303";
     private static final String TOKEN_IS_NULL_CODE = "40304";
     private JwtTokenProvider jwtTokenProvider;

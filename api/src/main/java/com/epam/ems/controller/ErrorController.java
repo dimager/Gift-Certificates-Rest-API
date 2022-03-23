@@ -1,6 +1,7 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.exception.response.ExceptionWithCodeResponse;
+import com.epam.ems.provider.MessageProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +21,13 @@ public class ErrorController {
         ExceptionWithCodeResponse bodyTokenIsNull = (ExceptionWithCodeResponse) request.getAttribute("tokenException");
         if (Objects.nonNull(bodyVerification)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(bodyVerification);
-        } else {
+        } else if (Objects.nonNull(bodyTokenIsNull)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(bodyTokenIsNull);
+        } else {
+            ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(
+                    MessageProvider.getLocalizedExceptionMessage("40300"), "40300", HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
+
     }
 }

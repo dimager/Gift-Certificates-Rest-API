@@ -63,7 +63,7 @@ class AuthenticationControllerTest {
                 .andExpect(status().isOk());
         String incorrectPasswordUser = "{\"username\": \"user\",\"password\": \"PASS1\"}";
         mvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(incorrectPasswordUser))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isBadRequest());
     }
 
 }

@@ -1,6 +1,5 @@
 package com.epam.ems.jwt.response;
 
-import lombok.Data;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

@@ -20,11 +20,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userDao.getUser(username);
-        return this.fromUser(user);
+        try {
+            User user = userDao.getUser(username);
+            return this.fromUser(user);
+        } catch (RuntimeException e) {
+            throw new UsernameNotFoundException("User not found");
+        }
     }
 
-    private UserDetails fromUser(User user){
+    private UserDetails fromUser(User user) {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(), user.getPassword(),
                 user.getStatus().equals(Status.ACTIVE),
