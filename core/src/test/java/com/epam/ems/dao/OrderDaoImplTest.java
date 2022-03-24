@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -69,6 +68,5 @@ class OrderDaoImplTest {
 
         assertAll(() -> assertEquals(order.getUser(),newOrder.getUser()),
                 () -> assertTrue(orderDao.isOrderExist(newOrder.getId())));
-        System.out.println("newOrder = " + newOrder);
     }
 }

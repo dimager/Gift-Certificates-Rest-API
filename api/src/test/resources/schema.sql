@@ -42,12 +42,14 @@ create table certificate_tags
             on delete cascade
 );
 
-create table users
-(
-    user_id  bigint auto_increment
-        primary key,
-    username varchar(45) not null
+CREATE TABLE users (
+                       user_id bigint PRIMARY KEY AUTO_INCREMENT,
+                       username varchar(45) NOT NULL,
+                       password varchar(255) NOT NULL,
+                       role varchar(255) NULL DEFAULT 'USER',
+                       status varchar(255) NULL DEFAULT 'ACTIVE'
 );
+
 
 create table orders
 (

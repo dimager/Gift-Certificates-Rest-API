@@ -18,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -42,29 +43,29 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Getter
     private long id;
 
-    @NotEmpty(message = "Name cant be empty")
-    @Size(min = 1, max = 45, message = "Max name size is 45")
+    @NotEmpty(message = "30101")
+    @Size(min = 1, max = 45, message = "30102")
     @Setter
     @Getter
     @Column(length = 45)
     private String name;
 
-    @NotEmpty(message = "Description cant be empty")
-    @Size(min = 1, max = 255, message = "Max description size is 255")
+    @NotEmpty(message = "30103")
+    @Size(min = 1, max = 255, message = "30104")
     @Setter
     @Getter
     private String description;
 
-    @NotNull(message = "Price should be present")
+    @NotNull(message = "30105")
     @Setter
     @Getter
-    @Positive(message = "Price must be positive")
+    @Positive(message = "30106")
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
     @Setter
     @Getter
-    @Positive(message = "Duration must be positive")
+    @Positive(message = "30107")
     private short duration;
 
     @Setter
@@ -83,6 +84,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Setter
     @ManyToMany
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Valid
     @JoinTable(name = "certificate_tags",
             joinColumns = @JoinColumn(name = "certificate_id", referencedColumnName = "certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tag_id"))
@@ -111,8 +113,6 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
                 ", duration=" + duration +
                 ", createdDateTime=" + createdDateTime +
                 ", lastUpdatedDateTime=" + lastUpdatedDateTime +
-                ", tags=" + tags +
-                ", orderCertificates=" + orderCertificates +
                 ", isArchived=" + isArchived +
                 '}';
     }

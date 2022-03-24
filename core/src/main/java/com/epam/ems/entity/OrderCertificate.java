@@ -33,7 +33,7 @@ public class OrderCertificate extends BaseEntity implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(name = "certificate_id", nullable = false)
     private Certificate certificate;
-    @Positive(message = "Amount should be greater than 0.")
+    @Positive(message = "30110")
     @Getter
     @Setter
     @Column(nullable = false)

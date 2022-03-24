@@ -3,9 +3,7 @@ package com.epam.ems.dao.impl;
 import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
-import com.epam.ems.service.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +20,6 @@ import java.util.Set;
 
 @Repository
 public class CertificateDaoImpl implements CertificateDao {
-    private final static String SORT_NAME = "name";
     private final static String SORT_NAME_DESC = "name_desc";
     private final static String SORT_DATE = "date";
     private final static String SORT_DATE_DESC = "date_desc";
@@ -30,7 +27,6 @@ public class CertificateDaoImpl implements CertificateDao {
     private final static String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
     private final static String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
     private final static String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
-    private static final String MSG_SORT_TYPE_NOT_FOUND = "30406;Sort type was not found";
     private final static String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
     private final static String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
     private final static String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
@@ -137,9 +133,6 @@ public class CertificateDaoImpl implements CertificateDao {
 
         if (sort.isPresent()) {
             switch (sort.get().toLowerCase(Locale.ROOT)) {
-                case SORT_NAME:
-                    criteriaQuery.orderBy(builder.asc(root.get("name")));
-                    break;
                 case SORT_NAME_DESC:
                     criteriaQuery.orderBy(builder.desc(root.get("name")));
                     break;
@@ -162,7 +155,8 @@ public class CertificateDaoImpl implements CertificateDao {
                     criteriaQuery.orderBy(builder.desc(root.get("name")), builder.desc(root.get("createdDateTime")));
                     break;
                 default:
-                    throw new ServiceException(HttpStatus.NOT_FOUND, MSG_SORT_TYPE_NOT_FOUND);
+                    criteriaQuery.orderBy(builder.asc(root.get("name")));
+                    break;
             }
         }
 
@@ -173,10 +167,8 @@ public class CertificateDaoImpl implements CertificateDao {
                     builder.and(builder.isFalse(root.get("isArchived")),
                             builder.or(builder.like(root.get("name"), builder.parameter(String.class, "pattern")),
                                     builder.like(root.get("description"), builder.parameter(String.class, "pattern")))));
-            StringBuilder pattern = new StringBuilder();
-            pattern.append("%").append(filterPattern.get()).append("%");
             tq = entityManager.createQuery(criteriaQuery);
-            tq.setParameter("pattern", pattern.toString());
+            tq.setParameter("pattern", "%" + filterPattern.get() + "%");
         }
         return tq;
     }

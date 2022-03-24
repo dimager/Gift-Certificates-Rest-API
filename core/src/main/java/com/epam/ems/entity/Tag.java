@@ -32,8 +32,8 @@ public class Tag extends BaseEntity {
     @Setter
     private long id;
 
-    @NotEmpty(message = "Tag name should be not empty")
-    @Size(min = 1, max = 255, message = "Wrong size of tag name")
+    @NotEmpty(message = "30111")
+    @Size(min = 1, max = 255, message = "30112")
     @Getter
     @Setter
     @Column(nullable = false, unique = true)

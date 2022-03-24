@@ -4,14 +4,20 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Order;
 import com.epam.ems.entity.OrderCertificate;
 import com.epam.ems.entity.Tag;
+import com.epam.ems.exception.JwtAuthenticationException;
+import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.Optional;
 
+import static com.epam.ems.security.Permission.ORDER_READ;
+import static com.epam.ems.security.Permission.USER_ORDER_READ;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -26,11 +34,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping(value = "/orders")
 public class OrderController {
-    private OrderService orderService;
+    private static final String ACCESS_DENIED_CODE = "40300";
+    private final OrderService orderService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, JwtTokenProvider jwtTokenProvider) {
         this.orderService = orderService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     /**
@@ -42,12 +53,25 @@ public class OrderController {
      * @return list of certificates
      */
     @GetMapping()
-    public CollectionModel<Order> getOrders(@RequestParam(name = "size", defaultValue = "10") int size,
-                                            @RequestParam(name = "page", defaultValue = "1") int page,
-                                            @RequestParam(name = "userId", required = false) Optional<Long> userId) {
-        CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
-        orders.getContent().forEach(this::createLinks);
-        return orders;
+    @PreAuthorize("hasAuthority('order:read') or hasAuthority('userorder:read')")
+    public CollectionModel<Order> getOrders(
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "userId", required = false) Optional<Long> userId,
+            @RequestHeader(name = "Authorization") String token) {
+        if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+            CollectionModel<Order> orders = orderService.getAll(size, page, Optional.of(jwtTokenProvider.getId(token)), linkTo(OrderController.class));
+            orders.getContent().forEach(this::createLinks);
+            return orders;
+        } else if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(ORDER_READ.getPermission()))) {
+            CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
+            orders.getContent().forEach(this::createLinks);
+            return orders;
+        } else {
+            throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
+        }
     }
 
     /**
@@ -57,18 +81,47 @@ public class OrderController {
      * @return order
      */
     @GetMapping("{id}")
-    public Order getOrder(@PathVariable long id) {
+    @PreAuthorize("hasAnyAuthority('order:read','userorder:read')")
+    public Order getOrder(@RequestHeader(name = "Authorization") String token,
+                          @PathVariable long id) {
         Order order = orderService.getOrder(id);
-        createLinks(order);
+        this.createLinks(order);
+        if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+            if (order.getUser().getId() == jwtTokenProvider.getId(token)) {
+                return order;
+            } else {
+                throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
+            }
+        }
         return order;
     }
 
+    /**
+     * Allows creating order for user
+     *
+     * @param order order data
+     * @return created certificate with id
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('order:write') or hasAuthority('userorder:write')")
+    public Order createOrder(@RequestBody @Valid Order order,
+                             @RequestHeader(name = "Authorization") String token) {
+        if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+            order = orderService.createOrder(jwtTokenProvider.getId(token), order);
+            this.createLinks(order);
+            return order;
+        }
+        throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
+    }
+
     private void createLinks(Order order) {
-        order.add(linkTo(methodOn(OrderController.class).getOrder(order.getId())).withSelfRel());
-        order.add(linkTo(methodOn(UserController.class).getUser(order.getUser().getId())).withRel("User"));
-        order.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(order.getUser().getId()))).withRel("UserOrders"));
+        order.add(linkTo(methodOn(OrderController.class).getOrder(null, order.getId())).withSelfRel());
+        order.add(linkTo(methodOn(UserController.class).getUser(null, order.getUser().getId())).withRel("User"));
+        order.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(order.getUser().getId()), null)).withRel("UserOrders"));
         for (OrderCertificate orderCertificate : order.getOrderCertificates()) {
-            orderCertificate.add(linkTo(methodOn(OrderController.class).getOrder(order.getId())).withSelfRel());
+            orderCertificate.add(linkTo(methodOn(OrderController.class).getOrder(null, order.getId())).withSelfRel());
             Certificate certificate = orderCertificate.getCertificate();
             if (!certificate.hasLink("self")) {
                 certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
@@ -84,19 +137,5 @@ public class OrderController {
                 }
             }
         }
-    }
-
-    /**
-     * Allows creating order for user
-     *
-     * @param userId user id
-     * @param order  order data
-     * @return created certificate with id
-     */
-    @PostMapping
-    public Order createOrder(@RequestParam(required = false) Optional<Long> userId, @RequestBody @Valid Order order) {
-        order = orderService.createOrder(userId.get(), order);
-        this.createLinks(order);
-        return order;
     }
 }

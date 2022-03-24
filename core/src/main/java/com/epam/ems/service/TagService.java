@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface TagService {
 
-
-
     /**
      * Allows getting list of all {@link Tag tags} from DB.
      * @param size page size

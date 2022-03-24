@@ -1,44 +1,29 @@
 package com.epam.ems.exception.response;
 
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 
-public class ServiceExceptionResponse {
+@Data
+public class ExceptionWithCodeResponse {
 
     private String message;
     private String errorCode;
     private HttpStatus httpStatus;
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
+    public ExceptionWithCodeResponse(String message, String code, HttpStatus status) {
+        this.httpStatus = status;
+        this.errorCode = code;
         this.message = message;
     }
 
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ServiceExceptionResponse that = (ServiceExceptionResponse) o;
+        ExceptionWithCodeResponse that = (ExceptionWithCodeResponse) o;
         return Objects.equals(message, that.message) && Objects.equals(errorCode, that.errorCode) && httpStatus == that.httpStatus;
     }
 

@@ -1,6 +1,8 @@
 package com.epam.ems.entity;
 
 import com.epam.ems.listener.AuditListener;
+import com.epam.ems.security.Role;
+import com.epam.ems.security.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,13 +11,14 @@ import org.springframework.hateoas.Link;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,19 +27,36 @@ import java.util.Objects;
 @EntityListeners(AuditListener.class)
 @Table(name = "users")
 public class User extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     @Column(name = "user_id")
-    private long id;
-    @Size(message = "Incorrect username length", min = 1, max = 45)
-    @NotNull
     @Getter
     @Setter
+    private long id;
+
+    @Getter
+    @Setter
+    @NotNull
     @Column(length = 45)
     private String username;
+
+
+    @Getter
+    @Setter
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "role")
+    private Role role = Role.USER;
+
+    @Getter
+    @Setter
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "status")
+    private Status status = Status.ACTIVE;
+
+    @Getter
+    @Setter
+    private String password;
+
     @Getter
     @Setter
     @OneToMany(mappedBy = "user")

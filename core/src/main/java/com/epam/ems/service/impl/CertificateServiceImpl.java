@@ -27,11 +27,11 @@ import java.util.Set;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
-    private static final String MSG_CERTIFICATES_WERE_NOT_FOUND = "30401;Certificates were not found.";
-    private static final String MSG_CERTIFICATE_WAS_NOT_FOUND = "30402;Certificate was not found. Certificate id=";
-    private static final String MSG_CERTIFICATE_WAS_NOT_DELETED = "30403;Certificate was not deleted. Certificate id=";
-    private static final String MSG_CERTIFICATE_WAS_NOT_UPDATED = "30404;Certificate was not updated. Certificate id=";
-    private static final String MSG_CERTIFICATE_WAS_NOT_CREATED = "30405;Certificate was not created. Certificate name=";
+    private static final String MSG_CERTIFICATES_WERE_NOT_FOUND = "30401";
+    private static final String MSG_CERTIFICATE_WAS_NOT_FOUND = "30402";
+    private static final String MSG_CERTIFICATE_WAS_NOT_DELETED = "30403";
+    private static final String MSG_CERTIFICATE_WAS_NOT_UPDATED = "30404";
+    private static final String MSG_CERTIFICATE_WAS_NOT_CREATED = "30405";
     private final CertificateDao certificateDao;
     private final TagService tagService;
     private final PageService pageService;
@@ -77,8 +77,7 @@ public class CertificateServiceImpl implements CertificateService {
             PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(size, page, totalSize);
             return PagedModel.of(certificates, metadata, links);
         } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATES_WERE_NOT_FOUND, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATES_WERE_NOT_FOUND);
         }
     }
 
@@ -88,10 +87,10 @@ public class CertificateServiceImpl implements CertificateService {
             if (certificateDao.isCertificateExistById(id)) {
                 return certificateDao.getById(id);
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND, id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND, id);
         }
     }
 
@@ -102,10 +101,10 @@ public class CertificateServiceImpl implements CertificateService {
             if (certificateDao.isCertificateExistById(id)) {
                 return certificateDao.delete(id);
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND, id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_DELETED + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_DELETED, id);
         }
     }
 
@@ -119,10 +118,10 @@ public class CertificateServiceImpl implements CertificateService {
                 this.checkInputTagsForExistenceInDatabase(certificate);
                 return certificateDao.update(certificate);
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED + certificate.getId());
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED, certificate.getId());
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED + certificate.getId(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED, certificate.getId());
         }
 
     }
@@ -137,7 +136,7 @@ public class CertificateServiceImpl implements CertificateService {
             certificate = certificateDao.create(certificate);
             return certificate;
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_CREATED + certificate.getName(), e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_CREATED, certificate.getName());
         }
     }
 
@@ -152,10 +151,10 @@ public class CertificateServiceImpl implements CertificateService {
                 certificateDao.update(certificate);
                 return certificateDao.getById(id).getDuration() == durationOnly.getDuration();
             } else {
-                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND + id);
+                throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND, id);
             }
         } catch (RuntimeException e) {
-            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED + id, e.getCause());
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_UPDATED, id);
         }
     }
 
