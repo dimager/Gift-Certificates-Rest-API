@@ -5,8 +5,6 @@ import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.exception.response.ExceptionWithCodeResponse;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.provider.MessageProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;

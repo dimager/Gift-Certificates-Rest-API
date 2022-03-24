@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.Optional;
 
+import static com.epam.ems.security.Permission.ORDER_READ;
 import static com.epam.ems.security.Permission.USER_ORDER_READ;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -60,17 +61,17 @@ public class OrderController {
             @RequestHeader(name = "Authorization") String token) {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
-            if (userId.isPresent() && userId.get() == jwtTokenProvider.getId(token)) {
-                CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
-                orders.getContent().forEach(this::createLinks);
-                return orders;
-            } else {
-                throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
-            }
+            CollectionModel<Order> orders = orderService.getAll(size, page, Optional.of(jwtTokenProvider.getId(token)), linkTo(OrderController.class));
+            orders.getContent().forEach(this::createLinks);
+            return orders;
+        } else if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(ORDER_READ.getPermission()))) {
+            CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
+            orders.getContent().forEach(this::createLinks);
+            return orders;
+        } else {
+            throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
         }
-        CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
-        orders.getContent().forEach(this::createLinks);
-        return orders;
     }
 
     /**
