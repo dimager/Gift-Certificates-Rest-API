@@ -1,5 +1,6 @@
 package com.epam.ems.controller;
 
+import com.epam.ems.aws.S3Service;
 import com.epam.ems.aws.service.S3ServiceImpl;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -35,10 +35,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(value = "/certificates")
 public class CertificatesController {
     private final CertificateService certificateService;
-    private final S3ServiceImpl s3service;
+    private final S3Service s3service;
 
     @Autowired
-    public CertificatesController(CertificateService certificateService, S3ServiceImpl s3service) {
+    public CertificatesController(CertificateService certificateService, S3Service s3service) {
         this.certificateService = certificateService;
         this.s3service = s3service;
     }
@@ -88,7 +88,7 @@ public class CertificatesController {
 
     @PreAuthorize("hasAuthority('image:write')")
     @PutMapping("{id}/image")
-    public ResponseEntity setImage(@PathVariable String id, @RequestPart MultipartFile multipartFile) {
+    public ResponseEntity setImage(@PathVariable long id, @RequestPart MultipartFile multipartFile) {
         s3service.uploadImage(id, multipartFile);
         return ResponseEntity.ok().build();
     }

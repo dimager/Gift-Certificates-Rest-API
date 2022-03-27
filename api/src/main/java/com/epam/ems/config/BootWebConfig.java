@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
@@ -26,8 +27,8 @@ public class BootWebConfig extends AcceptHeaderLocaleResolver implements WebMvcC
     }
 
     @Bean
+    @Profile("!dev")
     public HikariDataSource dataSource(){
         return new AWSHikariDataSource();
     }
-
 }
