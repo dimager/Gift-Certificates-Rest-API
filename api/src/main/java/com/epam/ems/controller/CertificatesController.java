@@ -1,5 +1,6 @@
 package com.epam.ems.controller;
 
+import com.epam.ems.aws.service.S3ServiceImpl;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -31,10 +35,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping(value = "/certificates")
 public class CertificatesController {
     private final CertificateService certificateService;
+    private final S3ServiceImpl s3service;
 
     @Autowired
-    public CertificatesController(CertificateService certificateService) {
+    public CertificatesController(CertificateService certificateService, S3ServiceImpl s3service) {
         this.certificateService = certificateService;
+        this.s3service = s3service;
     }
 
     /**
@@ -75,6 +81,18 @@ public class CertificatesController {
         return certificate;
     }
 
+    @GetMapping("{id}/image")
+    public String getImage(@PathVariable long id){
+        return s3service.getImageBase64(id);
+    }
+
+    @PreAuthorize("hasAuthority('image:write')")
+    @PutMapping("{id}/image")
+    public ResponseEntity setImage(@PathVariable String id, @RequestPart MultipartFile multipartFile) {
+        s3service.uploadImage(id, multipartFile);
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * Allows deleting certificate by id.
      *
@@ -85,6 +103,7 @@ public class CertificatesController {
     @PreAuthorize("hasAuthority('certificate:write')")
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable long id) {
         if (certificateService.deleteCertificate(id)) {
+            s3service.deleteImage(id);
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -141,12 +160,12 @@ public class CertificatesController {
 
     private void createLinks(Certificate certificate) {
         certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
+        certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
         for (Tag tag : certificate.getTags()) {
             if (!tag.hasLink("self")) {
                 tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
             }
             if (!tag.hasLink("Certificates")) {
-                String[] tagName = {tag.getName()};
                 tag.add(Link.of(linkTo(CertificatesController.class)
                                 .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
                         .withRel("Certificates"));

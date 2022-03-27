@@ -10,4 +10,5 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("com.epam.ems")
 public class ResourceConfiguration {
 
+
 }
