@@ -160,7 +160,7 @@ public class CertificatesController {
 
     private void createLinks(Certificate certificate) {
         certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
-        certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
+//        certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
         for (Tag tag : certificate.getTags()) {
             if (!tag.hasLink("self")) {
                 tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
