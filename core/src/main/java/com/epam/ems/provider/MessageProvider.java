@@ -26,6 +26,6 @@ public class MessageProvider {
     }
 
     public static String getLocalizedValidationMessage(String validCode) {
-        return messageSource.getMessage("validation." + validCode, null, DEFAULT_VALIDATION_PROP + validCode, LocaleContextHolder.getLocale());
+        return messageSource.getMessage("validation." + validCode, null, validCode, LocaleContextHolder.getLocale());
     }
 }

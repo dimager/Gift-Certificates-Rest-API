@@ -158,6 +158,15 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
+    @Override
+    public boolean isCertificateExistById(long id) {
+        if (certificateDao.isCertificateExistById(id)) {
+            return true;
+        } else {
+            throw new ServiceException(HttpStatus.NOT_FOUND, MSG_CERTIFICATE_WAS_NOT_FOUND);
+        }
+    }
+
 
     private void checkInputTagsForExistenceInDatabase(Certificate certificate) {
         List<Tag> tags = new ArrayList<>(certificate.getTags());

@@ -4,9 +4,10 @@ import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.rds.auth.GetIamAuthTokenRequest;
 import com.amazonaws.services.rds.auth.RdsIamAuthTokenGenerator;
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.context.annotation.Profile;
 
+@Profile("!dev")
 public class AWSHikariDataSource extends HikariDataSource {
-
     private String rdbUsername = System.getenv("RDS_USER");
 
     private String rdsDBDriver = System.getenv("RDS_DRIVER");

@@ -10,8 +10,10 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.epam.ems.aws.S3Service;
+import com.epam.ems.service.CertificateService;
 import com.epam.ems.service.exception.ServiceException;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,16 +24,25 @@ import java.io.IOException;
 import java.util.Base64;
 
 @Component
+@Profile("!dev")
 public class S3ServiceImpl implements S3Service {
-    private final String DEFAULT_KEY = "images/default.png";
+
+    private final CertificateService certificateService;
     private AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
             .withRegion(System.getenv("BUCKET_REGION"))
             .withCredentials(new InstanceProfileCredentialsProvider(false))
             .build();
     private String bucketName = System.getenv("CERT_APP_BUCKET");
+    private final String DEFAULT_KEY = "images/default.png";
+
+    public S3ServiceImpl(CertificateService certificateService) {
+        this.certificateService = certificateService;
+    }
+
 
     @Override
     public String getImageBase64(Long id) {
+        certificateService.isCertificateExistById(id);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         S3Object s3Image;
         String key = "images/" + id + ".png";
@@ -54,7 +65,8 @@ public class S3ServiceImpl implements S3Service {
 
 
     @Override
-    public void uploadImage(String id, MultipartFile multipartFile) {
+    public void uploadImage(Long id, MultipartFile multipartFile) {
+        certificateService.isCertificateExistById(id);
         String key = "images/" + id + ".png";
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(multipartFile.getContentType());
@@ -66,7 +78,6 @@ public class S3ServiceImpl implements S3Service {
         } catch (IOException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30802");
         }
-
     }
 
     @Override
