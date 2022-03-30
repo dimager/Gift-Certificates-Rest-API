@@ -125,7 +125,8 @@ public class OrderController {
             Certificate certificate = orderCertificate.getCertificate();
             if (!certificate.hasLink("self")) {
                 certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
-              //  certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
+                certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
+                certificate.setImage(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image").getHref());
             }
             for (Tag tag : certificate.getTags()) {
                 if (!tag.hasLink("self")) {

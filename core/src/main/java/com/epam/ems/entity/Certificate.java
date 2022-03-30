@@ -18,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -79,6 +80,11 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     @Column(name = "last_update_date_time", columnDefinition = "timestamp")
     private Timestamp lastUpdatedDateTime;
+
+    @Getter
+    @Setter
+    @Transient
+    private String image;
 
     @Getter
     @Setter
