@@ -1,7 +1,6 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.aws.S3Service;
-import com.epam.ems.aws.service.S3ServiceImpl;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
@@ -82,8 +81,8 @@ public class CertificatesController {
     }
 
     @GetMapping("{id}/image")
-    public String getImage(@PathVariable long id){
-        return s3service.getImageBase64(id);
+    public ResponseEntity<String> getImage(@PathVariable long id){
+        return ResponseEntity.ok(s3service.getImageBase64(id));
     }
 
     @PreAuthorize("hasAuthority('image:write')")
@@ -160,7 +159,8 @@ public class CertificatesController {
 
     private void createLinks(Certificate certificate) {
         certificate.add(linkTo(methodOn(CertificatesController.class).getCertificate(certificate.getId())).withSelfRel());
-//        certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
+        certificate.add(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image"));
+        certificate.setImage(linkTo(methodOn(CertificatesController.class).getImage(certificate.getId())).withRel("image").getHref());
         for (Tag tag : certificate.getTags()) {
             if (!tag.hasLink("self")) {
                 tag.add(linkTo(methodOn(TagController.class).getTag(tag.getId())).withSelfRel());
