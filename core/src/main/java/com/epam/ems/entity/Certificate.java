@@ -83,11 +83,6 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
 
     @Getter
     @Setter
-    @Transient
-    private String image;
-
-    @Getter
-    @Setter
     @ManyToMany
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Valid

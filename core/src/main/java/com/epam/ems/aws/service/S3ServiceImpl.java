@@ -27,13 +27,21 @@ import java.util.Base64;
 @Profile("!dev")
 public class S3ServiceImpl implements S3Service {
 
+    private static final String BASE64_HEADER = "data:image/png;base64,";
+    private static final String BUCKET_NAME = System.getenv("CERT_APP_BUCKET");
+    private static final String DEFAULT_KEY = "images/default.png";
+    private static final String ROOT_PATH = "images/";
+    private static final String EXTENSION = ".png";
+    private static final String FORMAT_TYPE = "png";
+    private static final String GET_IMAGE_ERROR_CODE = "30801";
+    private static final String UPLOAD_IMAGE_ERROR_CODE = "30802";
+    private static final String DELETE_IMAGE_ERROR_CODE = "30803";
     private final CertificateService certificateService;
     private AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
             .withRegion(System.getenv("BUCKET_REGION"))
             .withCredentials(new InstanceProfileCredentialsProvider(false))
             .build();
-    private String bucketName = System.getenv("CERT_APP_BUCKET");
-    private final String DEFAULT_KEY = "images/default.png";
+
 
     public S3ServiceImpl(CertificateService certificateService) {
         this.certificateService = certificateService;
@@ -45,21 +53,21 @@ public class S3ServiceImpl implements S3Service {
         certificateService.isCertificateExistById(id);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         S3Object s3Image;
-        String key = "images/" + id + ".png";
+        String key = ROOT_PATH + id + EXTENSION;
         try {
-            if (s3Client.doesObjectExist(bucketName, key)) {
-                GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, key);
+            if (s3Client.doesObjectExist(BUCKET_NAME, key)) {
+                GetObjectRequest getObjectRequest = new GetObjectRequest(BUCKET_NAME, key);
                 s3Image = s3Client.getObject(getObjectRequest);
             } else {
-                GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, DEFAULT_KEY);
+                GetObjectRequest getObjectRequest = new GetObjectRequest(BUCKET_NAME, DEFAULT_KEY);
                 s3Image = s3Client.getObject(getObjectRequest);
             }
             BufferedImage image = ImageIO.read(s3Image.getObjectContent());
-            ImageIO.write(image, "png", outputStream);
-            return "data:image/png;base64," + Base64.getEncoder().encodeToString(outputStream.toByteArray());
+            ImageIO.write(image, FORMAT_TYPE, outputStream);
+            return BASE64_HEADER + Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
         } catch (IOException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30801");
+            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, GET_IMAGE_ERROR_CODE);
         }
     }
 
@@ -67,30 +75,30 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public void uploadImage(Long id, MultipartFile multipartFile) {
         certificateService.isCertificateExistById(id);
-        String key = "images/" + id + ".png";
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(multipartFile.getContentType());
-        metadata.setContentLength(multipartFile.getSize());
-        PutObjectRequest putObjectRequest;
+        String key = ROOT_PATH + id + EXTENSION;
         try {
-            putObjectRequest = new PutObjectRequest(bucketName, key, multipartFile.getInputStream(), metadata);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(multipartFile.getContentType());
+            metadata.setContentLength(multipartFile.getSize());
+            PutObjectRequest putObjectRequest;
+            putObjectRequest = new PutObjectRequest(BUCKET_NAME, key, multipartFile.getInputStream(), metadata);
             s3Client.putObject(putObjectRequest);
         } catch (IOException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30802");
+            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, UPLOAD_IMAGE_ERROR_CODE);
         }
     }
 
     @Override
     public void deleteImage(Long id) {
-        DeleteObjectRequest deleteObjectRequest;
-        String key = "images/" + id + ".png";
         try {
-            if (s3Client.doesObjectExist(bucketName, key)) {
-                deleteObjectRequest = new DeleteObjectRequest(bucketName, key);
+            DeleteObjectRequest deleteObjectRequest;
+            String key = ROOT_PATH + id + EXTENSION;
+            if (s3Client.doesObjectExist(BUCKET_NAME, key)) {
+                deleteObjectRequest = new DeleteObjectRequest(BUCKET_NAME, key);
                 s3Client.deleteObject(deleteObjectRequest);
             }
         } catch (SdkClientException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30803");
+            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, DELETE_IMAGE_ERROR_CODE);
         }
     }
 
