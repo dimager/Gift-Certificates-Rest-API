@@ -1,6 +1,8 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.entity.Order;
+import com.epam.ems.jwt.provider.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,19 +24,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@ActiveProfiles("controller_test")
+@ActiveProfiles("dev")
 class OrderControllerTest {
-    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." +
-            "eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NDgzNTE5NjJ9." +
-            "tVnU0fa44BXBAOwHNskx3WvL3Rg7twLetLo46aoJi-U";
-
-    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
-            ".eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY0ODM1MTYyNH0" +
-            ".mO0vZDehfguYesegEFwDcNVi19kHIrnzFn30tDvRI34";
-
+    private JwtTokenProvider jwtTokenProvider;
+    private String userToken;
+    private String adminToken;
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    OrderControllerTest(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        userToken = jwtTokenProvider.createToken("user", "USER", 1L);
+        adminToken = jwtTokenProvider.createToken("admin", "ADMIN", 2L);
+    }
+
 
     @Test
     void getOrders() throws Exception {
@@ -45,7 +50,7 @@ class OrderControllerTest {
                         .isArray()).andReturn();
         mvc.perform(get("/orders").header(HttpHeaders.AUTHORIZATION, userToken))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -73,14 +78,9 @@ class OrderControllerTest {
 
     @Test
     void getUserOrders() throws Exception {
-        int userid = 1;
-        int incorrectUserId = 2;
-        mvc.perform(get("/orders?userId=" + userid).header(HttpHeaders.AUTHORIZATION, userToken))
+        mvc.perform(get("/orders").header(HttpHeaders.AUTHORIZATION, userToken))
                 .andExpect(jsonPath("$.*").isArray())
                 .andExpect(status().isOk());
-        mvc.perform(get("/orders?userId=" + incorrectUserId).header(HttpHeaders.AUTHORIZATION, userToken))
-                .andExpect(jsonPath("$.*").isArray())
-                .andExpect(status().isForbidden());
     }
 
     @Test
