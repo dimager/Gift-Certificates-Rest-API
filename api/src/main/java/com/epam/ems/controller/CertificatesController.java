@@ -5,6 +5,7 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -108,7 +109,6 @@ public class CertificatesController {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     /**
      * Allows adding certificate.

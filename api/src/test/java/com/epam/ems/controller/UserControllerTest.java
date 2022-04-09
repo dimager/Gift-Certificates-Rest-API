@@ -22,16 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@ActiveProfiles("controller_test")
+@ActiveProfiles("dev")
 class UserControllerTest {
 
-    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." +
-            "eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NDgzNTE5NjJ9." +
-            "tVnU0fa44BXBAOwHNskx3WvL3Rg7twLetLo46aoJi-U";
+    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NTAwNjIzNTN9.3M_nMpDrYu-iU_tEOP_TDu5llOMfRREjdCSwWh0LZF8";
 
-    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
-            ".eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY0ODM1MTYyNH0" +
-            ".mO0vZDehfguYesegEFwDcNVi19kHIrnzFn30tDvRI34";
+    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY1MDA2MjI3NH0.015PNj-I5MJkkpD1KXVx9XCFPSRSzQ6_Vby3bpCoCeM";
 
     @Autowired
     private MockMvc mvc;
