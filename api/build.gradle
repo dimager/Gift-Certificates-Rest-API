@@ -55,6 +55,7 @@ jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
 }
 
+
 war {
     archivesBaseName = 'cert-system-api'
     archiveVersion = '1.0-SNAPSHOT'
