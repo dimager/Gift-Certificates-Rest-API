@@ -64,7 +64,7 @@ war {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "certapp"
+        property "sonar.projectKey", "certappapi"
     }
 }
 

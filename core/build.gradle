@@ -42,7 +42,7 @@ test {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "certapp"
+        property "sonar.projectKey", "certappcore"
     }
 }
 
