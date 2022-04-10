@@ -5,6 +5,7 @@ plugins {
     id 'application'
     id 'war'
     id 'jacoco'
+    id "org.sonarqube" version "3.3"
 }
 
 
@@ -61,6 +62,11 @@ war {
     archiveVersion = '1.0-SNAPSHOT'
 }
 
+sonarqube {
+    properties {
+        property "sonar.projectKey", "certapp"
+    }
+}
 
 
 application{
