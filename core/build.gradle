@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java-library'
+    id "org.sonarqube" version "3.3"
 }
 
 group 'com.epam.esm'
@@ -37,6 +38,12 @@ configurations.implementation {
 }
 test {
     useJUnitPlatform()
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "certapp"
+    }
 }
 
 jar {
