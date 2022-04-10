@@ -4,6 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'application'
     id 'war'
+    id 'jacoco'
 }
 
 
@@ -47,12 +48,18 @@ configurations.implementation {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
 }
 
 war {
     archivesBaseName = 'cert-system-api'
     archiveVersion = '1.0-SNAPSHOT'
 }
+
 
 
 application{
