@@ -3,6 +3,7 @@ package com.epam.ems.controller;
 import com.epam.ems.entity.Certificate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -29,18 +30,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
-@ActiveProfiles("controller_test")
+@ActiveProfiles("dev")
 class CertificatesControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." +
-            "eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NDgzNTE5NjJ9." +
-            "tVnU0fa44BXBAOwHNskx3WvL3Rg7twLetLo46aoJi-U";
 
-    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9" +
-            ".eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY0ODM1MTYyNH0" +
-            ".mO0vZDehfguYesegEFwDcNVi19kHIrnzFn30tDvRI34";
+    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NTAwNjIzNTN9.3M_nMpDrYu-iU_tEOP_TDu5llOMfRREjdCSwWh0LZF8";
+
+    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY1MDA2MjI3NH0.015PNj-I5MJkkpD1KXVx9XCFPSRSzQ6_Vby3bpCoCeM";
     @Test
     void getCertificates() throws Exception {
         mvc.perform(get("/certificates"))
@@ -63,14 +61,6 @@ class CertificatesControllerTest {
                 .andExpect(jsonPath("$.createdDateTime").isNotEmpty())
                 .andExpect(jsonPath("$.lastUpdatedDateTime").isNotEmpty())
                 .andExpect(jsonPath("$.tags").isArray());
-    }
-
-    @Test
-    void deleteCertificate() throws Exception {
-        int certificateId = 220;
-        mvc.perform(delete("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isOk());
-        mvc.perform(delete("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, userToken)).andExpect(status().isForbidden());
-        mvc.perform(get("/certificates/" + certificateId).header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isNotFound());
     }
 
     @Test

@@ -10,7 +10,8 @@ public enum Permission {
     CERTIFICATE_READ("certificate:read"),
     CERTIFICATE_WRITE("certificate:write"),
     USER_READ("user:read"),
-    USERINFO_READ("userinfo:read");
+    USERINFO_READ("userinfo:read"),
+    IMAGE_WRITE("image:write");
     private final String permission;
 
     Permission(String permission) {
