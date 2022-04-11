@@ -54,6 +54,11 @@ test {
 
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
 }
 
 
@@ -64,9 +69,12 @@ war {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "certappapi"
+        property 'sonar.projectKey', 'certappapi'
+        property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property 'sonar.coverage.jacoco.xmlReportPaths', '${project.buildDir}/reports/test/jacocoTestReport.xml'
     }
 }
+
 
 application{
     mainClassName = 'com.epam.ems.CertificateApplication'
