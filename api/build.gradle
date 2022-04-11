@@ -75,7 +75,6 @@ sonarqube {
     }
 }
 
-
 application{
     mainClassName = 'com.epam.ems.CertificateApplication'
 }
