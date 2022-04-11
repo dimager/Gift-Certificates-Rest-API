@@ -25,7 +25,7 @@ import java.util.Base64;
 
 @Component
 @Profile("dev")
-public class S3ServiceImplDev implements S3Service {
+public class S3ServiceImpl_dev implements S3Service {
     private final CertificateService certificateService;
     private final String DEFAULT_KEY = "images/default.png";
     private AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -34,7 +34,7 @@ public class S3ServiceImplDev implements S3Service {
             .build();
     private String bucketName = "bucket";
 
-    public S3ServiceImplDev(CertificateService certificateService) {
+    public S3ServiceImpl_dev(CertificateService certificateService) {
         this.certificateService = certificateService;
     }
 
