@@ -61,7 +61,6 @@ jacocoTestReport {
     }
 }
 
-
 war {
     archivesBaseName = 'cert-system-api'
     archiveVersion = '1.0-SNAPSHOT'
