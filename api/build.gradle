@@ -48,11 +48,11 @@ configurations.implementation {
 
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport // report is always generated after tests run
+    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
+    dependsOn test
     reports {
         xml.required = true
         csv.required = false
@@ -77,21 +77,3 @@ application{
     mainClassName = 'com.epam.ems.CertificateApplication'
 }
 
-task copyWar(type: Copy) {
-    dependsOn('war')
-    from 'build/libs'
-    into 'D:\\apache-tomee-webprofile-7.1.4\\webapps\\'
-    include 'cert-system-api-1.0-SNAPSHOT.war'
-    rename 'cert-system-api-1.0-SNAPSHOT.war', 'ROOT.war'
-
-}
-
-
-task copyWar2(type: Copy) {
-    dependsOn('clean')
-    dependsOn('war')
-    from 'build/libs'
-    into 'd:\\apache-tomcat-9.0.58\\webapps\\'
-    include 'cert-system-api-1.0-SNAPSHOT.war'
-    rename 'cert-system-api-1.0-SNAPSHOT.war', 'ROOT.war'
-}
