@@ -16,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,6 +37,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "certificates")
+@NamedQueries({
+        @NamedQuery(name = "Certificate.countByImageMd5SumEquals", query = "select count(c) from Certificate c where c.imageMd5Sum = ?1")
+})
 @EntityListeners(AuditListener.class)
 public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Id

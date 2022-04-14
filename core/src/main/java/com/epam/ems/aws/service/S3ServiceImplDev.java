@@ -1,10 +1,8 @@
 package com.epam.ems.aws.service;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -25,7 +23,7 @@ import java.util.Base64;
 
 @Component
 @Profile("dev")
-public class S3ServiceImpl_dev implements S3Service {
+public class S3ServiceImplDev implements S3Service {
     private final CertificateService certificateService;
     private final String DEFAULT_KEY = "images/default.png";
     private AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -34,7 +32,7 @@ public class S3ServiceImpl_dev implements S3Service {
             .build();
     private String bucketName = "bucket";
 
-    public S3ServiceImpl_dev(CertificateService certificateService) {
+    public S3ServiceImplDev(CertificateService certificateService) {
         this.certificateService = certificateService;
     }
 
@@ -80,17 +78,9 @@ public class S3ServiceImpl_dev implements S3Service {
     }
 
     @Override
-    public void deleteImage(Long id) {
-        DeleteObjectRequest deleteObjectRequest;
-        String key = "images/" + id + ".png";
-        try {
-            if (s3Client.doesObjectExist(bucketName, key)) {
-                deleteObjectRequest = new DeleteObjectRequest(bucketName, key);
-                s3Client.deleteObject(deleteObjectRequest);
-            }
-        } catch (SdkClientException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30803");
-        }
+    public void deleteImage(String imageHash) {
+
     }
+
 
 }

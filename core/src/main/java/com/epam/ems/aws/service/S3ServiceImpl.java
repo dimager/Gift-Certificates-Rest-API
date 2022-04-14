@@ -84,7 +84,7 @@ public class S3ServiceImpl implements S3Service {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] digest = md5.digest(multipartFile.getBytes());
-            String imageHash = new BigInteger(1,digest).toString(16);
+            String imageHash = new BigInteger(1, digest).toString(16);
             certificate.setImageMd5Sum(imageHash);
             certificateService.updateCertificate(certificate);
             String key = ROOT_PATH + imageHash + EXTENSION;
@@ -100,16 +100,15 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void deleteImage(Long id) {
+    public void deleteImage(String imageHash) {
         try {
-            DeleteObjectRequest deleteObjectRequest;
-            Certificate certificate = certificateService.getCertificate(id);
-            certificate.setImageMd5Sum("NULL");
-            certificateService.updateCertificate(certificate);
-            String key = ROOT_PATH + certificate.getImageMd5Sum() + EXTENSION;
-            if (s3Client.doesObjectExist(BUCKET_NAME, key)) {
-                deleteObjectRequest = new DeleteObjectRequest(BUCKET_NAME, key);
-                s3Client.deleteObject(deleteObjectRequest);
+            if (certificateService.couldBeImageDeleted(imageHash)) {
+                DeleteObjectRequest deleteObjectRequest;
+                String key = ROOT_PATH + imageHash + EXTENSION;
+                if (s3Client.doesObjectExist(BUCKET_NAME, key)) {
+                    deleteObjectRequest = new DeleteObjectRequest(BUCKET_NAME, key);
+                    s3Client.deleteObject(deleteObjectRequest);
+                }
             }
         } catch (SdkClientException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, DELETE_IMAGE_ERROR_CODE);
