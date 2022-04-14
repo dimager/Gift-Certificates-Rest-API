@@ -1,10 +1,8 @@
 package com.epam.ems.aws.service;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -76,20 +74,6 @@ public class S3ServiceImplDev implements S3Service {
             s3Client.putObject(putObjectRequest);
         } catch (IOException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30802");
-        }
-    }
-
-    @Override
-    public void deleteImage(Long id) {
-        DeleteObjectRequest deleteObjectRequest;
-        String key = "images/" + id + ".png";
-        try {
-            if (s3Client.doesObjectExist(bucketName, key)) {
-                deleteObjectRequest = new DeleteObjectRequest(bucketName, key);
-                s3Client.deleteObject(deleteObjectRequest);
-            }
-        } catch (SdkClientException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "30803");
         }
     }
 

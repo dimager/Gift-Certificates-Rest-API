@@ -5,7 +5,6 @@ import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -82,7 +81,7 @@ public class CertificatesController {
     }
 
     @GetMapping("{id}/image")
-    public ResponseEntity<String> getImage(@PathVariable long id){
+    public ResponseEntity<String> getImage(@PathVariable long id) {
         return ResponseEntity.ok(s3service.getImageBase64(id));
     }
 
@@ -103,7 +102,6 @@ public class CertificatesController {
     @PreAuthorize("hasAuthority('certificate:write')")
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable long id) {
         if (certificateService.deleteCertificate(id)) {
-            s3service.deleteImage(id);
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

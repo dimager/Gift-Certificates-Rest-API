@@ -16,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -80,6 +82,12 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     @Column(name = "last_update_date_time", columnDefinition = "timestamp")
     private Timestamp lastUpdatedDateTime;
+
+    @Getter
+    @Setter
+    @Column(name = "image_hash")
+    @JsonIgnore
+    private String imageMd5Sum;
 
     @Getter
     @Setter
