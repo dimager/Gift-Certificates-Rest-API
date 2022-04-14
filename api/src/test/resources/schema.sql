@@ -18,6 +18,7 @@ create table certificates
     is_archived           bit            not null,
     last_update_date_time timestamp      null,
     name                  varchar(45)    null,
+    image_hash            varchar(45)    null,
     price                 decimal(10, 2) null
 );
 

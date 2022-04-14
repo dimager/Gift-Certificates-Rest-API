@@ -85,7 +85,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Setter
     @Column(name = "image_hash")
     @JsonIgnore
-    private String imageMd5Sum;
+    private String imageMd5Sum = "";
 
     @Getter
     @Setter
