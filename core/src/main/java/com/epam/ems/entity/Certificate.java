@@ -83,6 +83,12 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
 
     @Getter
     @Setter
+    @Column(name = "image_hash")
+    @JsonIgnore
+    private String imageMd5Sum;
+
+    @Getter
+    @Setter
     @ManyToMany
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Valid
