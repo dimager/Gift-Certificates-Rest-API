@@ -101,9 +101,7 @@ public class CertificatesController {
     @DeleteMapping("{id}")
     @PreAuthorize("hasAuthority('certificate:write')")
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable long id) {
-        Certificate certificate = certificateService.getCertificate(id);
         if (certificateService.deleteCertificate(id)) {
-            s3service.deleteImage(certificate.getImageMd5Sum());
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

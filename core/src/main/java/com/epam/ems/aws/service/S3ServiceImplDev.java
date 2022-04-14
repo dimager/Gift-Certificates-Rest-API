@@ -77,10 +77,4 @@ public class S3ServiceImplDev implements S3Service {
         }
     }
 
-    @Override
-    public void deleteImage(String imageHash) {
-
-    }
-
-
 }

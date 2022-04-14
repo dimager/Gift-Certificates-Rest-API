@@ -1,10 +1,8 @@
 package com.epam.ems.aws.service;
 
-import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -39,13 +37,11 @@ public class S3ServiceImpl implements S3Service {
     private static final String FORMAT_TYPE = "png";
     private static final String GET_IMAGE_ERROR_CODE = "30801";
     private static final String UPLOAD_IMAGE_ERROR_CODE = "30802";
-    private static final String DELETE_IMAGE_ERROR_CODE = "30803";
     private final CertificateService certificateService;
     private AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
             .withRegion(System.getenv("BUCKET_REGION"))
             .withCredentials(new InstanceProfileCredentialsProvider(false))
             .build();
-
 
     public S3ServiceImpl(CertificateService certificateService) {
         this.certificateService = certificateService;
@@ -88,31 +84,16 @@ public class S3ServiceImpl implements S3Service {
             certificate.setImageMd5Sum(imageHash);
             certificateService.updateCertificate(certificate);
             String key = ROOT_PATH + imageHash + EXTENSION;
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(multipartFile.getContentType());
-            metadata.setContentLength(multipartFile.getSize());
-            PutObjectRequest putObjectRequest;
-            putObjectRequest = new PutObjectRequest(BUCKET_NAME, key, multipartFile.getInputStream(), metadata);
-            s3Client.putObject(putObjectRequest);
+            if (!s3Client.doesObjectExist(BUCKET_NAME, key)) {
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(multipartFile.getContentType());
+                metadata.setContentLength(multipartFile.getSize());
+                PutObjectRequest putObjectRequest;
+                putObjectRequest = new PutObjectRequest(BUCKET_NAME, key, multipartFile.getInputStream(), metadata);
+                s3Client.putObject(putObjectRequest);
+            }
         } catch (IOException | NoSuchAlgorithmException e) {
             throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, UPLOAD_IMAGE_ERROR_CODE);
         }
     }
-
-    @Override
-    public void deleteImage(String imageHash) {
-        try {
-            if (certificateService.couldBeImageDeleted(imageHash)) {
-                DeleteObjectRequest deleteObjectRequest;
-                String key = ROOT_PATH + imageHash + EXTENSION;
-                if (s3Client.doesObjectExist(BUCKET_NAME, key)) {
-                    deleteObjectRequest = new DeleteObjectRequest(BUCKET_NAME, key);
-                    s3Client.deleteObject(deleteObjectRequest);
-                }
-            }
-        } catch (SdkClientException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, DELETE_IMAGE_ERROR_CODE);
-        }
-    }
-
 }
