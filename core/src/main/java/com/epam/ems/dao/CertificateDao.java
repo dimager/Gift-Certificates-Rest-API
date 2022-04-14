@@ -36,7 +36,6 @@ public interface CertificateDao extends BaseDao<Certificate> {
      */
     Integer getNumberOCertificatesContainsTags(Set<Tag> tags);
 
-    Boolean couldImageBeDeleted(String imageHash);
 
     /**
      * Allows getting list of certificates with sort and filter by name or description

@@ -37,9 +37,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "certificates")
-@NamedQueries({
-        @NamedQuery(name = "Certificate.countByImageMd5SumEquals", query = "select count(c) from Certificate c where c.imageMd5Sum = ?1")
-})
 @EntityListeners(AuditListener.class)
 public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Id
@@ -90,7 +87,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate> {
     @Setter
     @Column(name = "image_hash")
     @JsonIgnore
-    private String imageMd5Sum = "";
+    private String imageMd5Sum;
 
     @Getter
     @Setter

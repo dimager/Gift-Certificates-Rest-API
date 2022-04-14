@@ -73,7 +73,5 @@ public interface CertificateService {
      */
     boolean updateDuration(long id, Certificate durationOnly);
 
-    boolean couldBeImageDeleted(String imageHash);
-
     boolean isCertificateExistById(long id);
 }

@@ -159,11 +159,6 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public boolean couldBeImageDeleted(String imageHash) {
-        return certificateDao.couldImageBeDeleted(imageHash);
-    }
-
-    @Override
     public boolean isCertificateExistById(long id) {
         if (certificateDao.isCertificateExistById(id)) {
             return true;

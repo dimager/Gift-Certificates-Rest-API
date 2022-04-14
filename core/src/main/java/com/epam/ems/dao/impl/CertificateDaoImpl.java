@@ -33,7 +33,6 @@ public class CertificateDaoImpl implements CertificateDao {
     private final static String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
     private final static String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
             ":tags and c.isArchived = false group by c.id having count(c.id) = :amount";
-    private final static String COULD_IMAGE_DELETED = "select (count(c) > 0) from Certificate c where c.imageMd5Sum = :imageHash";
 
 
     private final EntityManager entityManager;
@@ -106,13 +105,6 @@ public class CertificateDaoImpl implements CertificateDao {
         typedQuery.setParameter("tags", tags);
         typedQuery.setParameter("amount", (long) tags.size());
         return typedQuery.getResultList().size();
-    }
-
-    @Override
-    public Boolean couldImageBeDeleted(String imageHash) {
-        TypedQuery<Boolean> query = entityManager.createQuery(COULD_IMAGE_DELETED, Boolean.class);
-        query.setParameter("imageHash", imageHash);
-        return query.getSingleResult();
     }
 
     @Override
