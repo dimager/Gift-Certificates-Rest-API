@@ -26,6 +26,7 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
 
     @Override
     public void initialize(ValidPassword constraintAnnotation) {
+        //This method is guaranteed to be called before any use of this instance for validation.
     }
 
     @Override
