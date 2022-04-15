@@ -1,5 +1,7 @@
 package com.epam.ems.controller;
 
+import com.epam.ems.dto.OrderDTO;
+import com.epam.ems.dto.converter.DtoConverter;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Order;
 import com.epam.ems.entity.OrderCertificate;
@@ -37,11 +39,13 @@ public class OrderController {
     private static final String ACCESS_DENIED_CODE = "40300";
     private final OrderService orderService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final DtoConverter dtoConverter;
 
     @Autowired
-    public OrderController(OrderService orderService, JwtTokenProvider jwtTokenProvider) {
+    public OrderController(OrderService orderService, JwtTokenProvider jwtTokenProvider, DtoConverter dtoConverter) {
         this.orderService = orderService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.dtoConverter = dtoConverter;
     }
 
     /**
@@ -100,16 +104,16 @@ public class OrderController {
     /**
      * Allows creating order for user
      *
-     * @param order order data
+     * @param orderDTO order data
      * @return created certificate with id
      */
     @PostMapping
     @PreAuthorize("hasAuthority('order:write') or hasAuthority('userorder:write')")
-    public Order createOrder(@RequestBody @Valid Order order,
+    public Order createOrder(@RequestBody @Valid OrderDTO orderDTO,
                              @RequestHeader(name = "Authorization") String token) {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
-            order = orderService.createOrder(jwtTokenProvider.getId(token), order);
+            Order order = orderService.createOrder(jwtTokenProvider.getId(token), dtoConverter.convertToEntity(orderDTO));
             this.createLinks(order);
             return order;
         }
@@ -139,4 +143,6 @@ public class OrderController {
             }
         }
     }
+
+
 }

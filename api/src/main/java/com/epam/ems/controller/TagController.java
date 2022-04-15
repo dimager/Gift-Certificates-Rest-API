@@ -1,5 +1,7 @@
 package com.epam.ems.controller;
 
+import com.epam.ems.dto.TagDTO;
+import com.epam.ems.dto.converter.DtoConverter;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +30,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/tags")
 public class TagController {
     private final TagService tagService;
-
+    private final DtoConverter dtoConverter;
     @Autowired
-    public TagController(TagService tagService) {
+    public TagController(TagService tagService, DtoConverter dtoConverter) {
         this.tagService = tagService;
+        this.dtoConverter = dtoConverter;
     }
 
     /**
@@ -68,12 +71,13 @@ public class TagController {
     /**
      * Allows creating tag
      *
-     * @param tag tag data
+     * @param tagDTO tag data
      * @return created tag with id
      */
     @PostMapping(consumes = {"application/json"})
     @PreAuthorize("hasAuthority('tag:write')")
-    public Tag addTag(@RequestBody @Valid Tag tag) {
+    public Tag addTag(@RequestBody @Valid TagDTO tagDTO) {
+        Tag tag = dtoConverter.convertToEntity(tagDTO);
         tag = tagService.createTag(tag);
         createLinks(tag);
         return tag;
@@ -83,12 +87,13 @@ public class TagController {
      * Allows updating tag
      *
      * @param id  tag id
-     * @param tag tag data
+     * @param tagDTO tag data
      * @return updated tag
      */
     @PutMapping("{id}")
     @PreAuthorize("hasAuthority('tag:write')")
-    public Tag updateTag(@PathVariable long id, @RequestBody @Valid Tag tag) {
+    public Tag updateTag(@PathVariable long id, @RequestBody @Valid TagDTO tagDTO) {
+        Tag tag = dtoConverter.convertToEntity(tagDTO);
         tag.setId(id);
         tag = tagService.updateTag(tag);
         this.createLinks(tag);
@@ -130,4 +135,5 @@ public class TagController {
                         .toUriComponentsBuilder().queryParam("tags", tag.getName()).build().toString())
                 .withRel("Certificates"));
     }
+
 }

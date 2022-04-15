@@ -1,11 +1,12 @@
 package com.epam.ems.controller;
 
-import com.epam.ems.converter.UserConverter;
 import com.epam.ems.dto.UserDTO;
+import com.epam.ems.dto.converter.DtoConverter;
 import com.epam.ems.entity.User;
 import com.epam.ems.exception.JwtAuthenticationException;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
 import com.epam.ems.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
@@ -32,16 +33,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Validated
 @RequestMapping("/users")
 public class UserController {
-    private UserService userService;
-    private UserConverter userConverter;
-    private JwtTokenProvider jwtTokenProvider;
     private static final String ACCESS_DENIED_CODE = "40300";
+    private UserService userService;
+    private JwtTokenProvider jwtTokenProvider;
+    private final DtoConverter dtoConverter;
 
     @Autowired
-    public UserController(UserService userService, UserConverter userConverter, JwtTokenProvider jwtTokenProvider) {
+    public UserController(UserService userService, JwtTokenProvider jwtTokenProvider, ModelMapper modelMapper, DtoConverter dtoConverter) {
         this.userService = userService;
-        this.userConverter = userConverter;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.dtoConverter = dtoConverter;
     }
 
 
@@ -57,7 +58,7 @@ public class UserController {
     public CollectionModel<UserDTO> getUsers(@RequestParam(defaultValue = "10") int size,
                                              @RequestParam(defaultValue = "1") int page) {
         PagedModel<User> userPageModel = userService.getUsers(size, page, linkTo(UserController.class));
-        List<UserDTO> userDTOList = userPageModel.getContent().stream().map(user -> userConverter.convertToDto(user)).collect(Collectors.toList());
+        List<UserDTO> userDTOList = userPageModel.getContent().stream().map(user -> dtoConverter.convertToDTO(user)).collect(Collectors.toList());
         PagedModel<UserDTO> userDTOPagedModel = PagedModel.of(userDTOList, userPageModel.getMetadata(), userPageModel.getLinks());
         for (UserDTO user : userDTOPagedModel.getContent()) {
             user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(user.getId()), null)).withRel("Orders"));
@@ -78,14 +79,13 @@ public class UserController {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USERINFO_READ.getPermission()))) {
             if (id == jwtTokenProvider.getId(token)) {
-                UserDTO user = userConverter.convertToDto(userService.getUser(id));
+                UserDTO user = dtoConverter.convertToDTO(userService.getUser(id));
                 user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
-            }
-            else {
+            } else {
                 throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
             }
         }
-        UserDTO user = userConverter.convertToDto(userService.getUser(id));
+        UserDTO user = dtoConverter.convertToDTO(userService.getUser(id));
         user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
         return user;
     }

@@ -2,8 +2,7 @@ package com.epam.ems.entity;
 
 import com.epam.ems.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,34 +12,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @EntityListeners(AuditListener.class)
+@Data
 @Table(name = "tags")
-
 public class Tag extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, name = "tag_id")
-    @Getter
-    @Setter
     private long id;
 
-    @NotEmpty(message = "30111")
-    @Size(min = 1, max = 255, message = "30112")
-    @Getter
-    @Setter
     @Column(nullable = false, unique = true)
-
     private String name;
-    @Getter
-    @Setter
+
     @JsonIgnore
     @ManyToMany(mappedBy = "tags")
     private Set<Certificate> certificateList = new LinkedHashSet<>();
