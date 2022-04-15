@@ -10,7 +10,7 @@ import java.util.Map;
 public class ValidationExceptionResponse {
     private HttpStatus httpStatus;
     private String errorCode;
-    private Map<String, String> errors = new HashMap<String, String>();
+    private Map<String, String> errors = new HashMap<>();
 
     public ValidationExceptionResponse(HttpStatus httpStatus, String errorCode) {
         this.httpStatus = httpStatus;
