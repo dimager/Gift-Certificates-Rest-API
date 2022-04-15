@@ -22,12 +22,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class AppExceptionHandler extends ResponseEntityExceptionHandler {
-    private final Logger LOGGER = LogManager.getLogger(AppExceptionHandler.class);
-    private final static String TYPE_MISMATCH_CODE = "30701";
-    private final static String NO_HANDLER_CODE = "30702";
-    private final static String INCORRECT_FILED_CODE = "30703";
-    private final static String INTERNAL_EXCEPTION_CODE = "30704";
-    private final static String VALIDATION_EXCEPTION_CODE = "30100";
+    private static final Logger LOGGER = LogManager.getLogger(AppExceptionHandler.class);
+    private static final String TYPE_MISMATCH_CODE = "30701";
+    private static final String NO_HANDLER_CODE = "30702";
+    private static final String INCORRECT_FILED_CODE = "30703";
+    private static final String INTERNAL_EXCEPTION_CODE = "30704";
+    private static final String VALIDATION_EXCEPTION_CODE = "30100";
 
 
     @Override

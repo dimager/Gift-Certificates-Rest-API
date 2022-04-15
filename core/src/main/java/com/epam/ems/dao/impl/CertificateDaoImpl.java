@@ -20,18 +20,18 @@ import java.util.Set;
 
 @Repository
 public class CertificateDaoImpl implements CertificateDao {
-    private final static String SORT_NAME_DESC = "name_desc";
-    private final static String SORT_DATE = "date";
-    private final static String SORT_DATE_DESC = "date_desc";
-    private final static String SORT_NAME_ASC_DATE_ASC = "name_date";
-    private final static String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
-    private final static String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
-    private final static String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
-    private final static String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
-    private final static String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
-    private final static String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
-    private final static String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
-    private final static String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
+    private static final String SORT_NAME_DESC = "name_desc";
+    private static final String SORT_DATE = "date";
+    private static final String SORT_DATE_DESC = "date_desc";
+    private static final String SORT_NAME_ASC_DATE_ASC = "name_date";
+    private static final String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
+    private static final String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
+    private static final String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
+    private static final String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
+    private static final String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
+    private static final String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
+    private static final String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
+    private static final String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
             ":tags and c.isArchived = false group by c.id having count(c.id) = :amount";
 
 
