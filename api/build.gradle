@@ -18,7 +18,7 @@ repositories {
 dependencies {
     implementation project(":core")
 
-    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
     compileOnly 'org.projectlombok:lombok'
     implementation 'com.amazonaws:aws-java-sdk-rds:1.12.183'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.184'
@@ -67,6 +67,7 @@ war {
 
 sonarqube {
     properties {
+        property 'sonar'
         property 'sonar.projectKey', 'certappapi'
         property 'sonar.core.codeCoveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
