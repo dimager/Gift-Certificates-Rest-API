@@ -34,6 +34,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/users")
 public class UserController {
     private static final String ACCESS_DENIED_CODE = "40300";
+    private static final String ORDERS_REL = "Orders";
     private UserService userService;
     private JwtTokenProvider jwtTokenProvider;
     private final DtoConverter dtoConverter;
@@ -58,10 +59,10 @@ public class UserController {
     public CollectionModel<UserDTO> getUsers(@RequestParam(defaultValue = "10") int size,
                                              @RequestParam(defaultValue = "1") int page) {
         PagedModel<User> userPageModel = userService.getUsers(size, page, linkTo(UserController.class));
-        List<UserDTO> userDTOList = userPageModel.getContent().stream().map(user -> dtoConverter.convertToDTO(user)).collect(Collectors.toList());
+        List<UserDTO> userDTOList = userPageModel.getContent().stream().map(dtoConverter::convertToDTO).collect(Collectors.toList());
         PagedModel<UserDTO> userDTOPagedModel = PagedModel.of(userDTOList, userPageModel.getMetadata(), userPageModel.getLinks());
         for (UserDTO user : userDTOPagedModel.getContent()) {
-            user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(user.getId()), null)).withRel("Orders"));
+            user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(user.getId()), null)).withRel(ORDERS_REL));
         }
         return userDTOPagedModel;
     }
@@ -80,13 +81,13 @@ public class UserController {
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USERINFO_READ.getPermission()))) {
             if (id == jwtTokenProvider.getId(token)) {
                 UserDTO user = dtoConverter.convertToDTO(userService.getUser(id));
-                user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
+                user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel(ORDERS_REL));
             } else {
                 throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
             }
         }
         UserDTO user = dtoConverter.convertToDTO(userService.getUser(id));
-        user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel("Orders"));
+        user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel(ORDERS_REL));
         return user;
     }
 

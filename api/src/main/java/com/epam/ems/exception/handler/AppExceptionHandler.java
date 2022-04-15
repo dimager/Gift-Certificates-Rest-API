@@ -22,39 +22,39 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class AppExceptionHandler extends ResponseEntityExceptionHandler {
-    Logger logger = LogManager.getLogger(AppExceptionHandler.class);
-    private final String TYPE_MISMATCH_CODE = "30701";
-    private final String NO_HANDLER_CODE = "30702";
-    private final String INCORRECT_FILED_CODE = "30703";
-    private final String INTERNAL_EXCEPTION_CODE = "30704";
-    private final String VALIDATION_EXCEPTION_CODE = "30100";
+    private final Logger LOGGER = LogManager.getLogger(AppExceptionHandler.class);
+    private final static String TYPE_MISMATCH_CODE = "30701";
+    private final static String NO_HANDLER_CODE = "30702";
+    private final static String INCORRECT_FILED_CODE = "30703";
+    private final static String INTERNAL_EXCEPTION_CODE = "30704";
+    private final static String VALIDATION_EXCEPTION_CODE = "30100";
 
 
     @Override
     protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(MessageProvider.getLocalizedExceptionMessage(TYPE_MISMATCH_CODE), TYPE_MISMATCH_CODE, status);
-        logger.error(ex);
+        LOGGER.error(ex);
         return new ResponseEntity<>(response, headers, status);
     }
 
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(MessageProvider.getLocalizedExceptionMessage(NO_HANDLER_CODE), NO_HANDLER_CODE, status);
-        logger.error(ex);
+        LOGGER.error(ex);
         return new ResponseEntity<>(response, headers, status);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(MessageProvider.getLocalizedExceptionMessage(INCORRECT_FILED_CODE), INCORRECT_FILED_CODE, status);
-        logger.error(ex);
+        LOGGER.error(ex);
         return new ResponseEntity<>(response, headers, status);
     }
 
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(MessageProvider.getLocalizedExceptionMessage(INTERNAL_EXCEPTION_CODE), INTERNAL_EXCEPTION_CODE, status);
-        logger.error(ex);
+        LOGGER.error(ex);
         return new ResponseEntity<>(response, headers, status);
     }
 
@@ -64,7 +64,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         for (FieldError fieldError : ex.getFieldErrors()) {
             response.getErrors().put(fieldError.getField(), MessageProvider.getLocalizedValidationMessage(fieldError.getDefaultMessage()));
         }
-        logger.error(ex);
+        LOGGER.error(ex);
         return new ResponseEntity<>(response, status);
     }
 
@@ -72,14 +72,14 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(JwtAuthenticationException.class)
     public ResponseEntity<ExceptionWithCodeResponse> handleIncorrectUserId(JwtAuthenticationException e) {
         ExceptionWithCodeResponse response = new ExceptionWithCodeResponse(e.getMessage(), e.getCode(), e.getHttpStatus());
-        logger.error(e);
+        LOGGER.error(e);
         return ResponseEntity.status(e.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<ExceptionWithCodeResponse> handleServiceException(ServiceException e) {
         ExceptionWithCodeResponse exceptionResponse = new ExceptionWithCodeResponse(e.getMessage(), e.getCode(), e.getStatus());
-        logger.error(e);
+        LOGGER.error(e);
         return ResponseEntity.status(e.getStatus()).body(exceptionResponse);
     }
 }

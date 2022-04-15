@@ -32,13 +32,11 @@ public class DtoConverter {
     }
 
     public Order convertToEntity(OrderDTO orderDTO) {
-        Order order = modelMapper.map(orderDTO, Order.class);
-        return order;
+        return modelMapper.map(orderDTO, Order.class);
     }
 
     public Tag convertToEntity(TagDTO tagDTO) {
-        Tag tag = modelMapper.map(tagDTO, Tag.class);
-        return tag;
+        return modelMapper.map(tagDTO, Tag.class);
     }
 
     public UserDTO convertToDTO(User user) {

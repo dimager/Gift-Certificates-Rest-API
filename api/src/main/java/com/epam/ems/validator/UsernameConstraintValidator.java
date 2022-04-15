@@ -37,7 +37,7 @@ public class UsernameConstraintValidator implements ConstraintValidator<ValidUse
             return true;
         }
         StringBuilder validationErrors = new StringBuilder();
-        usernameValidator.getMessages(result).stream().forEach(message -> validationErrors.append(message));
+        usernameValidator.getMessages(result).stream().forEach(validationErrors::append);
         replaceWordPasswordToUsername(validationErrors);
         context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(validationErrors.toString()).addConstraintViolation();
@@ -48,9 +48,7 @@ public class UsernameConstraintValidator implements ConstraintValidator<ValidUse
         String wordPassword = "Password";
         String wordUsername = "Username";
 
-//        String wordPasswordRu = "\\u041F\\u0430\\u0440\\u043E\\u043B\\u044C";
         String wordPasswordRu = "Пароль";
-//        String wordUsernameRu = "\\u0418\\u043C\\u044F \\u043F\\u043E\\u043B\\u044C\\u0437\\u043E\\u0432\\u0430\\u0442\\u0435\\u043B\\u044F";
         String wordUsernameRu = "Имя пользователя";
 
         int wordIndex = validationErrors.indexOf(wordPassword);

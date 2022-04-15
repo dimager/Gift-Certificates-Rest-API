@@ -91,7 +91,7 @@ public class CertificatesController {
 
     @PreAuthorize("hasAuthority('image:write')")
     @PutMapping("{id}/image")
-    public ResponseEntity setImage(@PathVariable long id, @RequestPart MultipartFile multipartFile) {
+    public ResponseEntity<Object> setImage(@PathVariable long id, @RequestPart MultipartFile multipartFile) {
         s3service.uploadImage(id, multipartFile);
         return ResponseEntity.ok().build();
     }
