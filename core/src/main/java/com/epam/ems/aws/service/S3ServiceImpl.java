@@ -11,6 +11,7 @@ import com.epam.ems.aws.S3Service;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.service.CertificateService;
 import com.epam.ems.service.exception.ServiceException;
+import lombok.Generated;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import java.util.Base64;
 
 @Component
 @Profile("!dev")
+@Generated
 public class S3ServiceImpl implements S3Service {
 
     private static final String BASE64_HEADER = "data:image/png;base64,";
