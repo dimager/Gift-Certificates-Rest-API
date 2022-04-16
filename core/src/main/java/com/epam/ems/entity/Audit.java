@@ -1,6 +1,7 @@
 package com.epam.ems.entity;
 
 import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +34,7 @@ public class Audit {
     private Timestamp opTimestamp;
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -41,6 +43,7 @@ public class Audit {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(id, operation, auditObject, objectId, opTimestamp);
     }
