@@ -78,7 +78,7 @@ public class UserController {
     public UserDTO getUser(@RequestHeader(name = "Authorization") String token,
                            @PathVariable long id) {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USERINFO_READ.getPermission()))) {
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USERINFO_READ.getUserPermission()))) {
             if (id == jwtTokenProvider.getId(token)) {
                 UserDTO user = dtoConverter.convertToDTO(userService.getUser(id));
                 user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel(ORDERS_REL));

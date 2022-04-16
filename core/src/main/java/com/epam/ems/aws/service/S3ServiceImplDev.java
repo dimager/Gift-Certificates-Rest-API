@@ -25,7 +25,7 @@ import java.util.Base64;
 @Profile("dev")
 public class S3ServiceImplDev implements S3Service {
     private final CertificateService certificateService;
-    private final String DEFAULT_KEY = "images/default.png";
+    private static final String DEFAULT_KEY = "images/default.png";
     private AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
             .withRegion("us-east1")
             .withCredentials(new InstanceProfileCredentialsProvider(false))

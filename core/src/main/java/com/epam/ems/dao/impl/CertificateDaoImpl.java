@@ -27,12 +27,14 @@ public class CertificateDaoImpl implements CertificateDao {
     private static final String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
     private static final String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
     private static final String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
+    private static final String SORTED_FIELD = "createdDateTime";
     private static final String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
     private static final String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
     private static final String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
     private static final String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
     private static final String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
             ":tags and c.isArchived = false group by c.id having count(c.id) = :amount";
+    private static final String PATTERN_FIELD = "pattern";
 
 
     private final EntityManager entityManager;
@@ -137,22 +139,22 @@ public class CertificateDaoImpl implements CertificateDao {
                     criteriaQuery.orderBy(builder.desc(root.get("name")));
                     break;
                 case SORT_DATE:
-                    criteriaQuery.orderBy(builder.asc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.asc(root.get(SORTED_FIELD)));
                     break;
                 case SORT_DATE_DESC:
-                    criteriaQuery.orderBy(builder.desc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.desc(root.get(SORTED_FIELD)));
                     break;
                 case SORT_NAME_ASC_DATE_ASC:
-                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.asc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.asc(root.get(SORTED_FIELD)));
                     break;
                 case SORT_NAME_ASC_DATE_DESC:
-                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.desc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.desc(root.get(SORTED_FIELD)));
                     break;
                 case SORT_NAME_DESC_DATE_ASC:
-                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.asc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.asc(root.get(SORTED_FIELD)));
                     break;
                 case SORT_NAME_DESC_DATE_DESC:
-                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.desc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.desc(root.get(SORTED_FIELD)));
                     break;
                 default:
                     criteriaQuery.orderBy(builder.asc(root.get("name")));
@@ -165,10 +167,10 @@ public class CertificateDaoImpl implements CertificateDao {
         if (filterPattern.isPresent()) {
             criteriaQuery.where(
                     builder.and(builder.isFalse(root.get("isArchived")),
-                            builder.or(builder.like(root.get("name"), builder.parameter(String.class, "pattern")),
-                                    builder.like(root.get("description"), builder.parameter(String.class, "pattern")))));
+                            builder.or(builder.like(root.get("name"), builder.parameter(String.class, PATTERN_FIELD)),
+                                    builder.like(root.get("description"), builder.parameter(String.class, PATTERN_FIELD)))));
             tq = entityManager.createQuery(criteriaQuery);
-            tq.setParameter("pattern", "%" + filterPattern.get() + "%");
+            tq.setParameter(PATTERN_FIELD, "%" + filterPattern.get() + "%");
         }
         return tq;
     }

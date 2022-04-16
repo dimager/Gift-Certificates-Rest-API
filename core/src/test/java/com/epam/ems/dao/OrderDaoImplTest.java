@@ -36,7 +36,7 @@ class OrderDaoImplTest {
     @Test
     void getAllOrders() {
         int pageSize = 12;
-        assertTrue(orderDao.getAllOrders(pageSize, 0).size() == pageSize);
+        assertEquals(pageSize,orderDao.getAllOrders(pageSize, 0).size());
     }
 
     @Test
@@ -45,7 +45,7 @@ class OrderDaoImplTest {
         long userId = 1;
         long missingUserId = -1;
         assertAll(() -> assertTrue(orderDao.getUserOrders(pageSize, 0, userId).size() > 0),
-                () -> assertTrue(orderDao.getUserOrders(pageSize, 0, missingUserId).size() == 0));
+                () -> assertEquals(0,orderDao.getUserOrders(pageSize, 0, missingUserId).size()));
     }
 
     @Test

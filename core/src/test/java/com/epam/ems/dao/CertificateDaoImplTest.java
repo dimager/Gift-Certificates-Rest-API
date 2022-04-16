@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -78,7 +79,6 @@ class CertificateDaoImplTest {
         certificate.setPrice(new BigDecimal("50.02"));
         certificateDao.update(certificate);
         Certificate finalCertificate = certificateDao.getById(id);
-        ;
         assertAll(() -> assertEquals(finalCertificate.getName(), newName),
                 () -> assertEquals(finalCertificate.getDescription(), newDescription));
     }
@@ -94,7 +94,7 @@ class CertificateDaoImplTest {
         Certificate certificate = certificateDao.create(newCertificate);
         Certificate certFroDB = certificateDao.getById(certificate.getId());
         assertAll(
-                () -> assertTrue(certificate.getId() != 0),
+                () -> assertNotEquals(certificate.getId(),0),
                 () -> assertEquals(certificate, certFroDB));
     }
 

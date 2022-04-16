@@ -78,9 +78,4 @@ public class User extends BaseEntity {
         return Objects.hash(super.hashCode(), id, username, orders);
     }
 
-
-    @Override
-    public List<Link> getLinks(String relation) {
-        return super.getLinks(relation);
-    }
 }

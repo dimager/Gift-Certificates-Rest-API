@@ -18,6 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.Valid;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import java.util.Set;
 @Data
 @Table(name = "certificates")
 @EntityListeners(AuditListener.class)
-public class Certificate extends BaseEntity implements Comparable<Certificate> {
+public class Certificate extends BaseEntity implements Comparable<Certificate>, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, name = "certificate_id")

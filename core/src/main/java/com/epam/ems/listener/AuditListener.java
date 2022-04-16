@@ -18,10 +18,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class AuditListener {
-    static private AuditDao auditDao;
-
-    public AuditListener() {
-    }
+    private static AuditDao auditDao;
 
     @Autowired
     public void init(AuditDao auditDao) {

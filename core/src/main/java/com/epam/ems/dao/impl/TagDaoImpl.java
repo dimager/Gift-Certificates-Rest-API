@@ -20,7 +20,6 @@ public class TagDaoImpl implements TagDao {
     private static final String FIND_ALL = "select t from Tag t";
     private static final String FIND_BY_NAME_EQUALS = "select t from Tag t where t.name = :name";
     private static final String EXISTS_BY_NAME_EQUALS = "select (count(t) > 0) from Tag t where t.name = :name";
-    private static final Logger logger = LogManager.getLogger(TagDaoImpl.class);
     private static final String SQL_SELECT_MOST_POPULAR_TAG =
             "select t.tag_id, t.name, sum(oc.amount) as totaltags, o.user_id, t1.totalcost from tags as t " +
                     "join certificate_tags as ct on t.tag_id = ct.tag_id " +

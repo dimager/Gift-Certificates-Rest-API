@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.PositiveOrZero;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.Objects;
 @EntityListeners(AuditListener.class)
 @Data
 @Table(name = "orders")
-public class Order extends BaseEntity {
+public class Order extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, name = "order_id")
@@ -52,10 +53,6 @@ public class Order extends BaseEntity {
     @NotEmpty(message = "30106")
     @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<OrderCertificate> orderCertificates = new ArrayList<>();
-
-
-    public Order() {
-    }
 
     @Override
     public boolean equals(Object o) {

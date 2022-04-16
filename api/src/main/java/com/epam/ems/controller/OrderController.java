@@ -64,12 +64,12 @@ public class OrderController {
             @RequestParam(name = "userId", required = false) Optional<Long> userId,
             @RequestHeader(name = "Authorization") String token) {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getUserPermission()))) {
             CollectionModel<Order> orders = orderService.getAll(size, page, Optional.of(jwtTokenProvider.getId(token)), linkTo(OrderController.class));
             orders.getContent().forEach(this::createLinks);
             return orders;
         } else if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(ORDER_READ.getPermission()))) {
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(ORDER_READ.getUserPermission()))) {
             CollectionModel<Order> orders = orderService.getAll(size, page, userId, linkTo(OrderController.class));
             orders.getContent().forEach(this::createLinks);
             return orders;
@@ -91,7 +91,7 @@ public class OrderController {
         Order order = orderService.getOrder(id);
         this.createLinks(order);
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getUserPermission()))) {
             if (order.getUser().getId() == jwtTokenProvider.getId(token)) {
                 return order;
             } else {
@@ -112,7 +112,7 @@ public class OrderController {
     public Order createOrder(@RequestBody @Valid OrderDTO orderDTO,
                              @RequestHeader(name = "Authorization") String token) {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getPermission()))) {
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getUserPermission()))) {
             Order order = orderService.createOrder(jwtTokenProvider.getId(token), dtoConverter.convertToEntity(orderDTO));
             this.createLinks(order);
             return order;
