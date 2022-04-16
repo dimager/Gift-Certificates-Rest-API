@@ -2,8 +2,6 @@ package com.epam.ems.dao.impl;
 
 import com.epam.ems.dao.TagDao;
 import com.epam.ems.entity.Tag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

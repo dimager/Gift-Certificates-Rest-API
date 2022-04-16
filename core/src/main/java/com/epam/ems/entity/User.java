@@ -5,7 +5,6 @@ import com.epam.ems.security.Role;
 import com.epam.ems.security.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.springframework.hateoas.Link;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
