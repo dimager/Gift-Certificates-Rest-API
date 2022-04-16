@@ -94,7 +94,7 @@ class CertificateDaoImplTest {
         Certificate certificate = certificateDao.create(newCertificate);
         Certificate certFroDB = certificateDao.getById(certificate.getId());
         assertAll(
-                () -> assertNotEquals(certificate.getId(),0),
+                () -> assertNotEquals(0, certificate.getId()),
                 () -> assertEquals(certificate, certFroDB));
     }
 
