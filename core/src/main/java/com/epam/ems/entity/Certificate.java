@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -92,6 +93,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate>, 
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -104,6 +106,7 @@ public class Certificate extends BaseEntity implements Comparable<Certificate>, 
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), id, name, description, price, duration, createdDateTime,
                 lastUpdatedDateTime, isArchived);

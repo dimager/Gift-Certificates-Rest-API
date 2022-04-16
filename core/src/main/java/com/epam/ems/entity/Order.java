@@ -5,6 +5,7 @@ import com.epam.ems.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -55,6 +56,7 @@ public class Order extends BaseEntity implements Serializable {
     private List<OrderCertificate> orderCertificates = new ArrayList<>();
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -64,6 +66,7 @@ public class Order extends BaseEntity implements Serializable {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), id, purchaseDate, cost, user, orderCertificates);
     }

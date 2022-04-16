@@ -3,6 +3,7 @@ package com.epam.ems.entity;
 import com.epam.ems.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,6 +48,7 @@ public class Tag extends BaseEntity implements Serializable {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -56,6 +58,7 @@ public class Tag extends BaseEntity implements Serializable {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), id, name);
     }
