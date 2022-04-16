@@ -2,7 +2,6 @@ package com.epam.ems.controller;
 
 import com.epam.ems.entity.User;
 import com.epam.ems.jwt.provider.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

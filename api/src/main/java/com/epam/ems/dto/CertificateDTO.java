@@ -10,7 +10,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -33,20 +32,4 @@ public class CertificateDTO extends BaseDTO {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Valid
     private Set<TagDTO> tags = new LinkedHashSet<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        CertificateDTO that = (CertificateDTO) o;
-        return duration == that.duration && Objects.equals(name, that.name)
-                && Objects.equals(description, that.description)
-                && Objects.equals(price, that.price) && Objects.equals(tags, that.tags);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), name, description, price, duration, tags);
-    }
 }
