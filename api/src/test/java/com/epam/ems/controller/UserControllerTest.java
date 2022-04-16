@@ -1,6 +1,8 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.entity.User;
+import com.epam.ems.jwt.provider.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,32 +26,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
 class UserControllerTest {
-
-    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NTAwNjIzNTN9.3M_nMpDrYu-iU_tEOP_TDu5llOMfRREjdCSwWh0LZF8";
-
-    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY1MDA2MjI3NH0.015PNj-I5MJkkpD1KXVx9XCFPSRSzQ6_Vby3bpCoCeM";
-
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    private String userToken;
+    private String adminToken;
     @Autowired
     private MockMvc mvc;
 
+    @BeforeEach
+    void setUp() {
+        userToken = jwtTokenProvider.createToken("user", "USER", 1L);
+        adminToken = jwtTokenProvider.createToken("admin", "ADMIN", 2L);
+    }
 
     @Test
     void getUsers() throws Exception {
-        mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION,userToken))
+        mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, userToken))
                 .andExpect(status().isForbidden());
-        mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION,adminToken))
+        mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getUser() throws Exception {
         int userId = 1;
-        mvc.perform(get("/users/" + userId).header(HttpHeaders.AUTHORIZATION,adminToken))
+        mvc.perform(get("/users/" + userId).header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andExpect(jsonPath("$.username").isNotEmpty())
                 .andExpect(status().isOk());
-        mvc.perform(get("/users/" + userId).header(HttpHeaders.AUTHORIZATION,userToken))
+        mvc.perform(get("/users/" + userId).header(HttpHeaders.AUTHORIZATION, userToken))
                 .andExpect(status().isOk());
-        mvc.perform(get("/users/" + 100).header(HttpHeaders.AUTHORIZATION,userToken))
+        mvc.perform(get("/users/" + 100).header(HttpHeaders.AUTHORIZATION, userToken))
                 .andExpect(status().isForbidden());
     }
 
@@ -62,7 +68,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         User user = mapFromJson(mvcResult.getResponse().getContentAsString(), User.class);
-        mvc.perform(get("/users/" + user.getId()).header(HttpHeaders.AUTHORIZATION,adminToken))
+        mvc.perform(get("/users/" + user.getId()).header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andDo(print())
                 .andExpect(jsonPath("$.username").value("newUsername"))
                 .andExpect(status().isOk());

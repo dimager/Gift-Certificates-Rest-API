@@ -1,6 +1,8 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.entity.Certificate;
+import com.epam.ems.jwt.provider.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,11 +35,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CertificatesControllerTest {
     @Autowired
     private MockMvc mvc;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    private  String userToken;
+    private String adminToken;
 
+    @BeforeEach
+    void setUp() {
+        userToken = jwtTokenProvider.createToken("user","USER", 1L);
+        adminToken = jwtTokenProvider.createToken("admin","ADMIN", 2L);
+    }
 
-    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NTAwNjIzNTN9.3M_nMpDrYu-iU_tEOP_TDu5llOMfRREjdCSwWh0LZF8";
-
-    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY1MDA2MjI3NH0.015PNj-I5MJkkpD1KXVx9XCFPSRSzQ6_Vby3bpCoCeM";
     @Test
     void getCertificates() throws Exception {
         mvc.perform(get("/certificates"))

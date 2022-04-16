@@ -1,6 +1,8 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.entity.Tag;
+import com.epam.ems.jwt.provider.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,12 +28,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
 class TagControllerTest {
-    private String userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6IlVTRVIiLCJpc3MiOiJhdXRoMCIsImlkIjoxLCJleHAiOjE2NTAwNjIzNTN9.3M_nMpDrYu-iU_tEOP_TDu5llOMfRREjdCSwWh0LZF8";
-
-    private String adminToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlzcyI6ImF1dGgwIiwiaWQiOjIsImV4cCI6MTY1MDA2MjI3NH0.015PNj-I5MJkkpD1KXVx9XCFPSRSzQ6_Vby3bpCoCeM";
-
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    private String userToken;
+    private String adminToken;
     @Autowired
     private MockMvc mvc;
+
+    @BeforeEach
+    void setUp() {
+        userToken = jwtTokenProvider.createToken("user", "USER", 1L);
+        adminToken = jwtTokenProvider.createToken("admin", "ADMIN", 2L);
+    }
 
     @Test
     void getAllTags() throws Exception {
@@ -65,18 +73,18 @@ class TagControllerTest {
     void addTag() throws Exception {
         String tag = "{\"name\":\"newTag\"}";
 
-         mvc.perform(post("/tags").header(HttpHeaders.AUTHORIZATION,userToken).contentType(MediaType.APPLICATION_JSON).content(tag))
+        mvc.perform(post("/tags").header(HttpHeaders.AUTHORIZATION, userToken).contentType(MediaType.APPLICATION_JSON).content(tag))
                 .andDo(print())
                 .andExpect(status().isForbidden());
 
-        MvcResult mvcResult = mvc.perform(post("/tags").header(HttpHeaders.AUTHORIZATION,adminToken).contentType(MediaType.APPLICATION_JSON).content(tag))
+        MvcResult mvcResult = mvc.perform(post("/tags").header(HttpHeaders.AUTHORIZATION, adminToken).contentType(MediaType.APPLICATION_JSON).content(tag))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("newTag")).andReturn();
 
         Tag tagFromDB = mapFromJson(mvcResult.getResponse().getContentAsString(), Tag.class);
 
-        mvc.perform(get("/tags/" + tagFromDB.getId()).header(HttpHeaders.AUTHORIZATION,adminToken))
+        mvc.perform(get("/tags/" + tagFromDB.getId()).header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andExpect(jsonPath("$.name").value("newTag"))
                 .andExpect(status().isOk());
     }
@@ -100,8 +108,8 @@ class TagControllerTest {
 
     @Test
     void deleteTag() throws Exception {
-        mvc.perform(delete("/tags/1").header(HttpHeaders.AUTHORIZATION,userToken)).andExpect(status().isForbidden());
-        mvc.perform(delete("/tags/1").header(HttpHeaders.AUTHORIZATION,adminToken)).andExpect(status().isOk());
-        mvc.perform(get("/tags/1").header(HttpHeaders.AUTHORIZATION,adminToken)).andExpect(status().isNotFound());
+        mvc.perform(delete("/tags/1").header(HttpHeaders.AUTHORIZATION, userToken)).andExpect(status().isForbidden());
+        mvc.perform(delete("/tags/1").header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isOk());
+        mvc.perform(get("/tags/1").header(HttpHeaders.AUTHORIZATION, adminToken)).andExpect(status().isNotFound());
     }
 }
