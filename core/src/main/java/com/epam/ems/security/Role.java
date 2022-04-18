@@ -1,6 +1,5 @@
 package com.epam.ems.security;
 
-import lombok.Generated;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Arrays;

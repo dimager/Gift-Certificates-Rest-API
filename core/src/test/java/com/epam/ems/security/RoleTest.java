@@ -9,4 +9,9 @@ class RoleTest {
     void getPermissions() {
         assertTrue(Role.USER.getPermissions().contains(Permission.USER_ORDER_READ));
     }
+
+    @Test
+    void getAuthorities() {
+        assertFalse(Role.USER.getAuthorities().isEmpty());
+    }
 }
