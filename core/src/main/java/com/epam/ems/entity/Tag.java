@@ -54,13 +54,14 @@ public class Tag extends BaseEntity implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Tag tag = (Tag) o;
-        return id == tag.id && name.equals(tag.name) && Objects.equals(certificateList, tag.certificateList);
+        return id == tag.id && name.equals(tag.name);
     }
+
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, name);
+        return Objects.hash(id, name);
     }
 
 

@@ -2,6 +2,7 @@ package com.epam.ems.dao;
 
 import com.epam.ems.TestDaoConfig;
 import com.epam.ems.entity.Certificate;
+import com.epam.ems.entity.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -105,6 +108,24 @@ class CertificateDaoImplTest {
         assertAll(
                 () -> Assertions.assertInstanceOf(Certificate.class, certificateDao.getById(testCertificateId)),
                 () -> assertTrue(certificateDao.delete(testCertificateId)));
+    }
+
+    @Test
+    @Transactional
+    void getCertificatesContainsTags(){
+        Set<Tag> tagSet = new HashSet<>();
+        Tag tag = new Tag(10,"auto10");
+        tagSet.add(tag);
+        List<Certificate> certificateList = certificateDao.getCertificatesContainsTags(10,0,tagSet);
+        assertTrue(certificateList.stream().allMatch(certificate -> certificate.getTags().contains(tag)));
+    }
+    @Test
+    @Transactional
+    void getNumberOCertificatesContainsTags(){
+        Set<Tag> tagSet = new HashSet<>();
+        Tag tag = new Tag(10,"auto10");
+        tagSet.add(tag);
+        assertNotEquals(0,certificateDao.getNumberOCertificatesContainsTags(tagSet));
     }
 
 }
