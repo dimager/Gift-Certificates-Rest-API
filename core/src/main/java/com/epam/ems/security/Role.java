@@ -1,5 +1,6 @@
 package com.epam.ems.security;
 
+import lombok.Generated;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import static com.epam.ems.security.Permission.USER_ORDER_READ;
 import static com.epam.ems.security.Permission.USER_ORDER_WRITE;
 import static com.epam.ems.security.Permission.USER_READ;
 
+@Generated
 public enum Role {
     USER(USER_ORDER_READ, USER_ORDER_WRITE, TAG_READ, CERTIFICATE_READ, USERINFO_READ),
     ADMIN(TAG_READ, TAG_WRITE, CERTIFICATE_READ, CERTIFICATE_WRITE, ORDER_READ, ORDER_WRITE, USER_READ, IMAGE_WRITE);
