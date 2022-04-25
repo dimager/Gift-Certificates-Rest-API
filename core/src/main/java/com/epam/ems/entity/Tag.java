@@ -2,8 +2,8 @@ package com.epam.ems.entity;
 
 import com.epam.ems.listener.AuditListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,34 +13,24 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @EntityListeners(AuditListener.class)
+@Data
 @Table(name = "tags")
-
-public class Tag extends BaseEntity {
-
+public class Tag extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, name = "tag_id")
-    @Getter
-    @Setter
     private long id;
 
-    @NotEmpty(message = "30111")
-    @Size(min = 1, max = 255, message = "30112")
-    @Getter
-    @Setter
     @Column(nullable = false, unique = true)
-
     private String name;
-    @Getter
-    @Setter
+
     @JsonIgnore
     @ManyToMany(mappedBy = "tags")
     private Set<Certificate> certificateList = new LinkedHashSet<>();
@@ -58,17 +48,20 @@ public class Tag extends BaseEntity {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Tag tag = (Tag) o;
-        return id == tag.id && name.equals(tag.name) && Objects.equals(certificateList, tag.certificateList);
+        return id == tag.id && name.equals(tag.name);
     }
 
+
     @Override
+    @Generated
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, name);
+        return Objects.hash(id, name);
     }
 
 

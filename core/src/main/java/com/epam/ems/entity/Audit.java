@@ -1,7 +1,7 @@
 package com.epam.ems.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,35 +10,41 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = "audit")
+@Data
 public class Audit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     @Column(name = "audit_id")
     private long id;
 
-    @Setter
-    @Getter
     private String operation;
 
-    @Setter
-    @Getter
     @Column(name = "audit_object")
     private String auditObject;
 
-    @Setter
-    @Getter
     @Column(name = "object_id")
     private long objectId;
 
-    @Setter
-    @Getter
     @Column(name = "op_timestamp", columnDefinition = "timestamp")
     private Timestamp opTimestamp;
 
+    @Override
+    @Generated
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Audit audit = (Audit) o;
+        return id == audit.id && objectId == audit.objectId && Objects.equals(operation, audit.operation) && Objects.equals(auditObject, audit.auditObject) && Objects.equals(opTimestamp, audit.opTimestamp);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(id, operation, auditObject, objectId, opTimestamp);
+    }
 }

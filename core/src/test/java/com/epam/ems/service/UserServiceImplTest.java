@@ -57,15 +57,4 @@ class UserServiceImplTest {
         assertAll(() -> assertThrows(ServiceException.class, () ->  userService.isUserExist(anyLong())));
     }
 
-   /* @Test
-    void create() {
-        User user = new User();
-        user.setUsername("newUsername13");
-        user.setPassword("password");
-
-        when(userDao.create(any(User.class))).thenReturn(user).thenThrow(RuntimeException.class);
-        when(passwordEncoder.encode(any())).thenReturn("password");
-        assertAll(() -> assertEquals(user,userService.create(any(User.class))),
-                () -> assertThrows(ServiceException.class, () -> userService.create(any(User.class))));
-    }*/
 }

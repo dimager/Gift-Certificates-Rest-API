@@ -4,9 +4,8 @@ import com.epam.ems.listener.AuditListener;
 import com.epam.ems.security.Role;
 import com.epam.ems.security.Status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.hateoas.Link;
+import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,47 +17,34 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 @EntityListeners(AuditListener.class)
+@Data
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    @Getter
-    @Setter
     private long id;
 
-    @Getter
-    @Setter
-    @NotNull
     @Column(length = 45)
     private String username;
 
-
-    @Getter
-    @Setter
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role")
     private Role role = Role.USER;
 
-    @Getter
-    @Setter
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status")
     private Status status = Status.ACTIVE;
 
-    @Getter
-    @Setter
     private String password;
 
-    @Getter
-    @Setter
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Order> orders = new ArrayList<>();
@@ -80,6 +66,7 @@ public class User extends BaseEntity {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -89,13 +76,9 @@ public class User extends BaseEntity {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), id, username, orders);
     }
 
-
-    @Override
-    public List<Link> getLinks(String relation) {
-        return super.getLinks(relation);
-    }
 }

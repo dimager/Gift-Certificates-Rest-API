@@ -16,7 +16,7 @@ import java.util.Objects;
 public class ErrorController {
 
     @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT, RequestMethod.PATCH})
-    public ResponseEntity errorGet(HttpServletRequest request) {
+    public ResponseEntity<ExceptionWithCodeResponse> errorGet(HttpServletRequest request) {
         ExceptionWithCodeResponse bodyVerification = (ExceptionWithCodeResponse) request.getAttribute("verificationException");
         ExceptionWithCodeResponse bodyTokenIsNull = (ExceptionWithCodeResponse) request.getAttribute("tokenException");
         if (Objects.nonNull(bodyVerification)) {

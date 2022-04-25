@@ -2,6 +2,8 @@ plugins {
     id 'org.springframework.boot' version '2.6.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java-library'
+    id "org.sonarqube" version "3.3"
+    id 'jacoco'
 }
 
 group 'com.epam.esm'
@@ -37,6 +39,25 @@ configurations.implementation {
 }
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "certappcore"
+        property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+    }
 }
 
 jar {

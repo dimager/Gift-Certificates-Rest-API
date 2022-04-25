@@ -2,6 +2,7 @@ package com.epam.ems.service.impl;
 
 import com.epam.ems.service.PageService;
 import com.epam.ems.service.exception.ServiceException;
+import lombok.Generated;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
+@Generated
 public class PageServiceImpl implements PageService {
     private static final String MSG_PAGE_NOT_FOUND = "30607";
 

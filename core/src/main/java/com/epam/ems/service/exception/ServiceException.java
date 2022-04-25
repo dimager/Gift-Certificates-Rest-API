@@ -7,8 +7,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Getter
 public class ServiceException extends ResponseStatusException {
-    private String message;
-    private String code;
+    private final String message;
+    private final String code;
     private Long id;
     private String args = "";
 

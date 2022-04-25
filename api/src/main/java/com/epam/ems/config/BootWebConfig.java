@@ -2,6 +2,7 @@ package com.epam.ems.config;
 
 import com.epam.ems.aws.AWSHikariDataSource;
 import com.zaxxer.hikari.HikariDataSource;
+import org.modelmapper.ModelMapper;
 import org.passay.spring.SpringMessageResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -30,5 +31,10 @@ public class BootWebConfig extends AcceptHeaderLocaleResolver implements WebMvcC
     @Profile("!dev")
     public HikariDataSource dataSource(){
         return new AWSHikariDataSource();
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }

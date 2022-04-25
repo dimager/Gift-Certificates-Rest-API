@@ -11,10 +11,10 @@ import java.util.List;
 
 @Repository
 public class UserDaoImpl implements UserDao {
-    private final static String SELECT_USER_BY_ID = "SELECT u FROM User u where u.id = :id";
-    private final static String SELECT_ALL_USERS = "SELECT u FROM User u";
-    private final static String EXISTS_BY_ID_EQUALS = "select (count(u) > 0) from User u where u.id = :id";
-    private final static String SELECT_USER_BY_USERNAME = "SELECT u FROM User u where u.username = :username";
+    private static final String SELECT_USER_BY_ID = "SELECT u FROM User u where u.id = :id";
+    private static final String SELECT_ALL_USERS = "SELECT u FROM User u";
+    private static final String EXISTS_BY_ID_EQUALS = "select (count(u) > 0) from User u where u.id = :id";
+    private static final String SELECT_USER_BY_USERNAME = "SELECT u FROM User u where u.username = :username";
 
 
     private final EntityManager entityManager;

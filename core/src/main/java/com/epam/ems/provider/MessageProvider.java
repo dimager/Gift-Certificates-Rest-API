@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 public class MessageProvider {
     private static final String DEFAULT_MESSAGE = "Default error message. code = ";
     private static final String DEFAULT_PROP = "Property doesnt found:";
-    private static final String DEFAULT_VALIDATION_PROP = "Validation property doesnt found:";
     private static ResourceBundleMessageSource messageSource;
 
     @Autowired

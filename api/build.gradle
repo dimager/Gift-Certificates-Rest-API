@@ -4,8 +4,9 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'application'
     id 'war'
+    id 'jacoco'
+    id "org.sonarqube" version "3.3"
 }
-
 
 group 'com.epam.esm'
 
@@ -17,7 +18,7 @@ repositories {
 dependencies {
     implementation project(":core")
 
-    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
     compileOnly 'org.projectlombok:lombok'
     implementation 'com.amazonaws:aws-java-sdk-rds:1.12.183'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.184'
@@ -37,7 +38,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test:5.6.2'
-
+    implementation 'org.modelmapper:modelmapper:3.1.0'
 
 }
 
@@ -47,6 +48,16 @@ configurations.implementation {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
 }
 
 war {
@@ -54,26 +65,15 @@ war {
     archiveVersion = '1.0-SNAPSHOT'
 }
 
+sonarqube {
+    properties {
+        property 'sonar.projectKey', 'certappapi'
+        property 'sonar.core.codeCoveragePlugin', 'jacoco'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+    }
+}
 
 application{
     mainClassName = 'com.epam.ems.CertificateApplication'
 }
 
-task copyWar(type: Copy) {
-    dependsOn('war')
-    from 'build/libs'
-    into 'D:\\apache-tomee-webprofile-7.1.4\\webapps\\'
-    include 'cert-system-api-1.0-SNAPSHOT.war'
-    rename 'cert-system-api-1.0-SNAPSHOT.war', 'ROOT.war'
-
-}
-
-
-task copyWar2(type: Copy) {
-    dependsOn('clean')
-    dependsOn('war')
-    from 'build/libs'
-    into 'd:\\apache-tomcat-9.0.58\\webapps\\'
-    include 'cert-system-api-1.0-SNAPSHOT.war'
-    rename 'cert-system-api-1.0-SNAPSHOT.war', 'ROOT.war'
-}

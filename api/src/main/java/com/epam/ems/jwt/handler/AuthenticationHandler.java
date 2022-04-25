@@ -28,10 +28,10 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
     private static final Logger LOGGER = LogManager.getLogger(AuthenticationHandler.class);
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
-    private String AUTH_FAIL = "auth.fail";
-    private String AUTH_FAIL_CODE = "30111";
-    private String AUTH_SUCCESS = "auth.success";
-    private String AUTH_SUCCESS_CODE = "30200";
+    private static final String AUTH_FAIL = "auth.fail";
+    private static final String AUTH_FAIL_CODE = "30111";
+    private static final String AUTH_SUCCESS = "auth.success";
+    private static final String AUTH_SUCCESS_CODE = "30200";
 
     @Autowired
     public AuthenticationHandler(UserService userService, JwtTokenProvider jwtTokenProvider) {

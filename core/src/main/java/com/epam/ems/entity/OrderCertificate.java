@@ -1,8 +1,8 @@
 package com.epam.ems.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,35 +18,26 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "order_certificate")
+@Data
 public class OrderCertificate extends BaseEntity implements Serializable {
     @Id
-    @Getter
-    @Setter
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order;
 
     @Id
-    @Getter
-    @Setter
     @ManyToOne(optional = false)
     @JoinColumn(name = "certificate_id", nullable = false)
     private Certificate certificate;
     @Positive(message = "30110")
-    @Getter
-    @Setter
     @Column(nullable = false)
     private long amount;
 
     @Positive
-    @Getter
-    @Setter
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    public OrderCertificate() {
-    }
 
     @PrePersist
     public void prePersist() {
@@ -54,6 +45,7 @@ public class OrderCertificate extends BaseEntity implements Serializable {
     }
 
     @Override
+    @Generated
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -63,6 +55,7 @@ public class OrderCertificate extends BaseEntity implements Serializable {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(super.hashCode(), order, certificate, amount, price);
     }

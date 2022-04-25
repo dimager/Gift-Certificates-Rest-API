@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,7 +34,7 @@ class UserDaoTest {
     @Test
     void getUsers() {
         int pageLimit = 143;
-        assertTrue(userDao.getUsers(pageLimit, 0).size() == pageLimit);
+        assertEquals(pageLimit,userDao.getUsers(pageLimit, 0).size());
     }
 
     @Test

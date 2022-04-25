@@ -1,11 +1,12 @@
 package com.epam.ems.controller;
 
 import com.epam.ems.aws.S3Service;
+import com.epam.ems.dto.CertificateDTO;
+import com.epam.ems.dto.converter.DtoConverter;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
 import com.epam.ems.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +37,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class CertificatesController {
     private final CertificateService certificateService;
     private final S3Service s3service;
+    private final DtoConverter dtoConverter;
 
     @Autowired
-    public CertificatesController(CertificateService certificateService, S3Service s3service) {
+    public CertificatesController(CertificateService certificateService, S3Service s3service, DtoConverter dtoConverter) {
         this.certificateService = certificateService;
         this.s3service = s3service;
+        this.dtoConverter = dtoConverter;
     }
 
     /**
@@ -82,13 +85,13 @@ public class CertificatesController {
     }
 
     @GetMapping("{id}/image")
-    public ResponseEntity<String> getImage(@PathVariable long id){
+    public ResponseEntity<String> getImage(@PathVariable long id) {
         return ResponseEntity.ok(s3service.getImageBase64(id));
     }
 
     @PreAuthorize("hasAuthority('image:write')")
     @PutMapping("{id}/image")
-    public ResponseEntity setImage(@PathVariable long id, @RequestPart MultipartFile multipartFile) {
+    public ResponseEntity<Object> setImage(@PathVariable long id, @RequestPart MultipartFile multipartFile) {
         s3service.uploadImage(id, multipartFile);
         return ResponseEntity.ok().build();
     }
@@ -103,7 +106,6 @@ public class CertificatesController {
     @PreAuthorize("hasAuthority('certificate:write')")
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable long id) {
         if (certificateService.deleteCertificate(id)) {
-            s3service.deleteImage(id);
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -113,13 +115,13 @@ public class CertificatesController {
     /**
      * Allows adding certificate.
      *
-     * @param certificate certificate data
+     * @param certificateDTO certificate data
      * @return created certificate with id
      */
     @PostMapping
     @PreAuthorize("hasAuthority('certificate:write')")
-    public Certificate addCertificate(@RequestBody @Valid Certificate certificate) {
-        certificate = certificateService.createCertificate(certificate);
+    public Certificate addCertificate(@RequestBody @Valid CertificateDTO certificateDTO) {
+        Certificate certificate = certificateService.createCertificate(dtoConverter.convertToEntity(certificateDTO));
         this.createLinks(certificate);
         return certificate;
     }
@@ -127,13 +129,14 @@ public class CertificatesController {
     /**
      * Allows updating certificate
      *
-     * @param id          certificateid
-     * @param certificate certificate parameters
+     * @param id             certificateid
+     * @param certificateDTO certificate parameters
      * @return updated certificate
      */
     @PutMapping("{id}")
     @PreAuthorize("hasAuthority('certificate:write')")
-    public Certificate updateCertificate(@PathVariable long id, @RequestBody @Valid Certificate certificate) {
+    public Certificate updateCertificate(@PathVariable long id, @RequestBody @Valid CertificateDTO certificateDTO) {
+        Certificate certificate = dtoConverter.convertToEntity(certificateDTO);
         certificate.setId(id);
         certificate = certificateService.updateCertificate(certificate);
         this.createLinks(certificate);
@@ -143,15 +146,15 @@ public class CertificatesController {
     /**
      * Allows updating certificate`s duration
      *
-     * @param id          certificateid
-     * @param certificate certificate parameters
+     * @param id             certificateid
+     * @param certificateDTO certificate parameters
      * @return updated certificate
      */
     @PatchMapping(path = "{id}")
     @PreAuthorize("hasAuthority('certificate:write')")
-    public Certificate updateCertificateDuration(@PathVariable long id, @RequestBody Certificate certificate) {
-        certificateService.updateDuration(id, certificate);
-        certificate = certificateService.getCertificate(id);
+    public Certificate updateCertificateDuration(@PathVariable long id, @RequestBody CertificateDTO certificateDTO) {
+        certificateService.updateDuration(id, dtoConverter.convertToEntity(certificateDTO));
+        Certificate certificate = certificateService.getCertificate(id);
         this.createLinks(certificate);
         return certificate;
     }
@@ -171,6 +174,8 @@ public class CertificatesController {
             }
         }
     }
+
+
 }
 
 

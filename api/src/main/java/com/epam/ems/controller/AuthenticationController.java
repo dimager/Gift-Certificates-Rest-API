@@ -1,9 +1,8 @@
 package com.epam.ems.controller;
 
-import com.epam.ems.converter.AuthenticateUserConverter;
-import com.epam.ems.converter.UserConverter;
 import com.epam.ems.dto.AuthenticateUserDTO;
 import com.epam.ems.dto.UserDTO;
+import com.epam.ems.dto.converter.DtoConverter;
 import com.epam.ems.entity.User;
 import com.epam.ems.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +19,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class AuthenticationController {
     private final UserService userService;
-    private final UserConverter userConverter;
-    private final AuthenticateUserConverter authenticateUserConverter;
+    private final DtoConverter dtoConverter;
 
     @Autowired
-    public AuthenticationController(UserService userService,
-                                    UserConverter userConverter,
-                                    AuthenticateUserConverter authenticateUserConverter) {
+    public AuthenticationController(UserService userService, DtoConverter dtoConverter) {
         this.userService = userService;
-        this.userConverter = userConverter;
-        this.authenticateUserConverter = authenticateUserConverter;
+        this.dtoConverter = dtoConverter;
     }
 
     /**
@@ -40,12 +35,11 @@ public class AuthenticationController {
      */
     @PostMapping("/sign-up")
     public UserDTO createUser(@RequestBody @Valid AuthenticateUserDTO user) {
-        User createdUser = userService.create(authenticateUserConverter.convertToEntity(user));
-        UserDTO userDTO = userConverter.convertToDto(createdUser);
+        User createdUser = userService.create(dtoConverter.convertToEntity(user));
+        UserDTO userDTO = dtoConverter.convertToDTO(createdUser);
         userDTO.add(linkTo(methodOn(OrderController.class)
                 .getOrders(10, 1, Optional.of(createdUser.getId()), null)).withRel("Orders"));
         return userDTO;
     }
-
 
 }

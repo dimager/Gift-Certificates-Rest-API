@@ -3,6 +3,7 @@ package com.epam.ems.dao.impl;
 import com.epam.ems.dao.CertificateDao;
 import com.epam.ems.entity.Certificate;
 import com.epam.ems.entity.Tag;
+import lombok.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +21,22 @@ import java.util.Set;
 
 @Repository
 public class CertificateDaoImpl implements CertificateDao {
-    private final static String SORT_NAME_DESC = "name_desc";
-    private final static String SORT_DATE = "date";
-    private final static String SORT_DATE_DESC = "date_desc";
-    private final static String SORT_NAME_ASC_DATE_ASC = "name_date";
-    private final static String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
-    private final static String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
-    private final static String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
-    private final static String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
-    private final static String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
-    private final static String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
-    private final static String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
-    private final static String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
+    private static final String SORT_NAME_DESC = "name_desc";
+    private static final String SORT_DATE = "date";
+    private static final String SORT_DATE_DESC = "date_desc";
+    private static final String SORT_NAME_ASC_DATE_ASC = "name_date";
+    private static final String SORT_NAME_ASC_DATE_DESC = "name_date_desc";
+    private static final String SORT_NAME_DESC_DATE_ASC = "name_desc_date";
+    private static final String SORT_NAME_DESC_DATE_DESC = "name_desc_date_desc";
+    private static final String SORTED_FIELD_DATE = "createdDateTime";
+    private static final String UPDATE_CERTIFICATE_SET_IS_ARCHIVED_TRUE = "update Certificate c set c.isArchived = true where c.id = :id";
+    private static final String FIND_ALL_CERTIFICATES = "select c from Certificate c where c.isArchived = false";
+    private static final String FIND_BY_ID = "select c from Certificate c where c.id = :id and c.isArchived = false";
+    private static final String EXISTS_BY_ID = "select (count(c) > 0) from Certificate c where c.id = :id and c.isArchived = false";
+    private static final String FIND_CERTIFICATES_BY_TAG_IN = "select c from Certificate c join c.tags t where t in " +
             ":tags and c.isArchived = false group by c.id having count(c.id) = :amount";
+    private static final String PATTERN_FIELD = "pattern";
+    private static final String SORTED_FIELD_NAME = "name";
 
 
     private final EntityManager entityManager;
@@ -124,6 +128,7 @@ public class CertificateDaoImpl implements CertificateDao {
         return tq.getResultList().size();
     }
 
+    @Generated
     private TypedQuery<Certificate> getCertificatesTypedQuery(Optional<String> sort, Optional<String> filterPattern) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> criteriaQuery = builder.createQuery(Certificate.class);
@@ -134,28 +139,28 @@ public class CertificateDaoImpl implements CertificateDao {
         if (sort.isPresent()) {
             switch (sort.get().toLowerCase(Locale.ROOT)) {
                 case SORT_NAME_DESC:
-                    criteriaQuery.orderBy(builder.desc(root.get("name")));
+                    criteriaQuery.orderBy(builder.desc(root.get(SORTED_FIELD_NAME)));
                     break;
                 case SORT_DATE:
-                    criteriaQuery.orderBy(builder.asc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.asc(root.get(SORTED_FIELD_DATE)));
                     break;
                 case SORT_DATE_DESC:
-                    criteriaQuery.orderBy(builder.desc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.desc(root.get(SORTED_FIELD_DATE)));
                     break;
                 case SORT_NAME_ASC_DATE_ASC:
-                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.asc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.asc(root.get(SORTED_FIELD_NAME)), builder.asc(root.get(SORTED_FIELD_DATE)));
                     break;
                 case SORT_NAME_ASC_DATE_DESC:
-                    criteriaQuery.orderBy(builder.asc(root.get("name")), builder.desc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.asc(root.get(SORTED_FIELD_NAME)), builder.desc(root.get(SORTED_FIELD_DATE)));
                     break;
                 case SORT_NAME_DESC_DATE_ASC:
-                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.asc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.desc(root.get(SORTED_FIELD_NAME)), builder.asc(root.get(SORTED_FIELD_DATE)));
                     break;
                 case SORT_NAME_DESC_DATE_DESC:
-                    criteriaQuery.orderBy(builder.desc(root.get("name")), builder.desc(root.get("createdDateTime")));
+                    criteriaQuery.orderBy(builder.desc(root.get(SORTED_FIELD_NAME)), builder.desc(root.get(SORTED_FIELD_DATE)));
                     break;
                 default:
-                    criteriaQuery.orderBy(builder.asc(root.get("name")));
+                    criteriaQuery.orderBy(builder.asc(root.get(SORTED_FIELD_NAME)));
                     break;
             }
         }
@@ -165,10 +170,10 @@ public class CertificateDaoImpl implements CertificateDao {
         if (filterPattern.isPresent()) {
             criteriaQuery.where(
                     builder.and(builder.isFalse(root.get("isArchived")),
-                            builder.or(builder.like(root.get("name"), builder.parameter(String.class, "pattern")),
-                                    builder.like(root.get("description"), builder.parameter(String.class, "pattern")))));
+                            builder.or(builder.like(root.get("name"), builder.parameter(String.class, PATTERN_FIELD)),
+                                    builder.like(root.get("description"), builder.parameter(String.class, PATTERN_FIELD)))));
             tq = entityManager.createQuery(criteriaQuery);
-            tq.setParameter("pattern", "%" + filterPattern.get() + "%");
+            tq.setParameter(PATTERN_FIELD, "%" + filterPattern.get() + "%");
         }
         return tq;
     }
