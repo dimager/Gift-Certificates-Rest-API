@@ -62,7 +62,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public long getNumberOfUsers() {
-        return entityManager.createQuery(SELECT_ALL_USERS, User.class)
-                .getResultList().size();
+        return entityManager.createQuery("select count(u) from User u", Long.class)
+                .getSingleResult();
     }
 }

@@ -105,7 +105,9 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public Integer getNumberOCertificatesContainsTags(Set<Tag> tags) {
-        TypedQuery<Certificate> typedQuery = entityManager.createQuery(FIND_CERTIFICATES_BY_TAG_IN, Certificate.class);
+        TypedQuery<Long> typedQuery = entityManager.createQuery(
+                "select count(c) from Certificate c join c.tags t where t in :tags and c.isArchived = false group by c.id having count(c.id) = :amount",
+                Long.class);
         typedQuery.setParameter("tags", tags);
         typedQuery.setParameter("amount", (long) tags.size());
         return typedQuery.getResultList().size();
@@ -124,8 +126,22 @@ public class CertificateDaoImpl implements CertificateDao {
     public Integer getCertificatesAmount(Optional<String> sort,
                                          Optional<String> filterPattern) {
 
-        TypedQuery<Certificate> tq = getCertificatesTypedQuery(sort, filterPattern);
-        return tq.getResultList().size();
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        Root<Certificate> root = countQuery.from(Certificate.class);
+        countQuery.select(builder.count(root));
+        countQuery.where(builder.isFalse(root.get("isArchived")));
+        if (filterPattern.isPresent()) {
+            countQuery.where(
+                    builder.and(builder.isFalse(root.get("isArchived")),
+                            builder.or(builder.like(root.get("name"), builder.parameter(String.class, PATTERN_FIELD)),
+                                    builder.like(root.get("description"), builder.parameter(String.class, PATTERN_FIELD)))));
+        }
+        TypedQuery<Long> tq = entityManager.createQuery(countQuery);
+        if (filterPattern.isPresent()) {
+            tq.setParameter(PATTERN_FIELD, "%" + filterPattern.get() + "%");
+        }
+        return tq.getSingleResult().intValue();
     }
 
     @Generated

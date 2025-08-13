@@ -112,7 +112,7 @@ public class OrderController {
     public Order createOrder(@RequestBody @Valid OrderDTO orderDTO,
                              @RequestHeader(name = "Authorization") String token) {
         if (SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_READ.getUserPermission()))) {
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(USER_ORDER_WRITE.getUserPermission()))) {
             Order order = orderService.createOrder(jwtTokenProvider.getId(token), dtoConverter.convertToEntity(orderDTO));
             this.createLinks(order);
             return order;
