@@ -82,6 +82,7 @@ public class UserController {
             if (id == jwtTokenProvider.getId(token)) {
                 UserDTO user = dtoConverter.convertToDTO(userService.getUser(id));
                 user.add(linkTo(methodOn(OrderController.class).getOrders(10, 1, Optional.of(id), null)).withRel(ORDERS_REL));
+                return user;
             } else {
                 throw new JwtAuthenticationException(ACCESS_DENIED_CODE, HttpStatus.FORBIDDEN);
             }
